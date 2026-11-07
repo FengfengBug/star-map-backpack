@@ -1,0 +1,343 @@
+.sidebar {
+  grid-area: sidebar;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 18px;
+  overflow: hidden;
+}
+
+.note-source {
+  flex: 0 0 auto;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.section-heading h2 {
+  margin: 3px 0 0;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 620;
+  letter-spacing: 0.01em;
+}
+
+.section-heading .icon-button {
+  margin-top: 1px;
+}
+
+.note-file {
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background:
+    linear-gradient(150deg, rgba(29, 51, 88, 0.28), transparent 62%),
+    rgba(13, 23, 43, 0.55);
+}
+
+.note-file__top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.note-file__icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(125, 170, 255, 0.16);
+  border-radius: 10px;
+  background: rgba(103, 151, 255, 0.08);
+  color: var(--star-blue);
+}
+
+.note-file__identity {
+  min-width: 0;
+  flex: 1;
+}
+
+.note-file__identity h3 {
+  overflow: hidden;
+  margin: 0 0 3px;
+  color: var(--text-soft);
+  font-size: 11.5px;
+  font-weight: 580;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.note-file__identity > span {
+  display: block;
+  color: var(--muted-2);
+  font-size: 9.5px;
+  letter-spacing: 0.02em;
+}
+
+.note-file__top .demo-tag {
+  flex: 0 0 auto;
+}
+
+.note-file__excerpt {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 10px 0 11px;
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.7;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.note-file__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(127, 156, 211, 0.09);
+  color: var(--muted-2);
+  font-size: 9px;
+  letter-spacing: 0.015em;
+}
+
+.note-file__loaded {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #84c9b1;
+}
+
+.note-actions {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.note-actions .button {
+  min-height: 33px;
+}
+
+.button__badge {
+  margin-left: auto;
+  padding: 2px 5px;
+  border: 1px solid rgba(128, 154, 201, 0.12);
+  border-radius: 4px;
+  color: var(--muted-2);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.note-source__hint {
+  margin: 7px 0 0;
+  color: var(--muted-2);
+  font-size: 9px;
+  text-align: center;
+}
+
+.sidebar__rule {
+  height: 1px;
+  flex: 0 0 auto;
+  margin: 16px 0 15px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+.outline {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.section-heading--outline {
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 21px;
+  padding: 0 7px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(114, 146, 219, 0.06);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.outline-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 3px;
+  scrollbar-width: thin;
+}
+
+.outline-group + .outline-group {
+  margin-top: 10px;
+}
+
+.outline-group__heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 23px;
+  padding: 0 7px;
+  color: var(--muted);
+}
+
+.outline-group__gem {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--tone);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--tone) 36%, transparent);
+}
+
+.outline-group__label {
+  font-size: 10.5px;
+  font-weight: 560;
+  letter-spacing: 0.05em;
+}
+
+.outline-group__count {
+  margin-left: auto;
+  color: var(--muted-2);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+.outline-list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.knowledge-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 29px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease,
+    border-color 140ms ease;
+}
+
+.knowledge-row:hover {
+  background: rgba(123, 159, 230, 0.06);
+  color: var(--text-soft);
+}
+
+.knowledge-row.is-selected {
+  border-color: color-mix(in srgb, var(--tone) 22%, transparent);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--tone) 11%, transparent), transparent 92%),
+    rgba(18, 31, 55, 0.58);
+  color: var(--text);
+}
+
+.knowledge-row--child {
+  padding-left: 19px;
+}
+
+.knowledge-row--child::before {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 9px;
+  width: 1px;
+  background: rgba(131, 160, 216, 0.1);
+  content: '';
+}
+
+.knowledge-row__star {
+  opacity: 0.82;
+}
+
+.knowledge-row.is-selected .knowledge-row__star {
+  opacity: 1;
+}
+
+.knowledge-row__title {
+  flex: 1;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 470;
+  letter-spacing: 0.015em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.knowledge-row.is-selected .knowledge-row__title {
+  font-weight: 560;
+}
+
+.knowledge-row__score {
+  flex: 0 0 auto;
+  color: var(--muted-2);
+  font-family: var(--font-mono);
+  font-size: 9px;
+}
+
+.knowledge-row.is-selected .knowledge-row__score {
+  color: color-mix(in srgb, var(--tone) 76%, white);
+}
+
+@media (max-height: 780px) and (min-width: 1121px) {
+  .note-file__excerpt {
+    display: none;
+  }
+
+  .note-file__footer {
+    padding-top: 8px;
+  }
+
+  .sidebar__rule {
+    margin: 12px 0;
+  }
+
+  .note-source__hint {
+    display: none;
+  }
+}
+
+@media (max-width: 1120px) {
+  .sidebar {
+    min-height: 520px;
+  }
+}
+
+@media (max-width: 840px) {
+  .sidebar {
+    min-height: auto;
+  }
+
+  .outline-scroll {
+    max-height: 430px;
+  }
+}

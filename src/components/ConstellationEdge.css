@@ -1,0 +1,54 @@
+.constellation-edge {
+  pointer-events: none;
+}
+
+.constellation-edge__halo,
+.constellation-edge__line {
+  fill: none;
+  stroke-linecap: round;
+  transition: opacity 180ms ease;
+}
+
+.constellation-edge__halo {
+  stroke-width: 5;
+  opacity: 0.045;
+}
+
+.constellation-edge__line {
+  stroke-width: 1;
+  opacity: 0.3;
+}
+
+.constellation-edge--related .constellation-edge__line {
+  opacity: 0.24;
+  stroke-dasharray: 2.5 5.5;
+}
+
+.constellation-edge--related .constellation-edge__halo {
+  opacity: 0.025;
+}
+
+.constellation-edge.is-active .constellation-edge__halo {
+  opacity: 0.14;
+}
+
+.constellation-edge.is-active .constellation-edge__line {
+  stroke-width: 1.35;
+  opacity: 0.82;
+}
+
+.constellation-edge.is-active.constellation-edge--related .constellation-edge__line {
+  stroke-dasharray: 3.5 4;
+}
+
+.constellation-edge__beacon {
+  opacity: 0.65;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .constellation-edge__halo,
+  .constellation-edge__line {
+    transition: none;
+  }
+}

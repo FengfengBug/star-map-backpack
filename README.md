@@ -2,7 +2,7 @@
 
 把课程笔记转化为可交互的知识星图，通过 0-1 背包算法，在有限复习时间内筛选最值得复习的知识点，并生成可视化复习航线。
 
-当前仓库已完成 **第一阶段：项目初始化与核心界面**、**Sprint 2：Markdown/TXT 笔记导入与示例课程**、**Sprint 3 的节点编辑面板与参数控件（Task 3.1、Task 3.2）**，以及 **Sprint 4 的 0-1 背包纯函数与可解释输出（Task 4.1、Task 4.2）**。项目不包含账号、后端、云数据库或 AI；背包算法尚未接入界面。
+当前仓库已完成 **第一阶段：项目初始化与核心界面**、**Sprint 2：Markdown/TXT 笔记导入与示例课程**、**Sprint 3 的节点编辑面板与参数控件（Task 3.1、Task 3.2）**，以及 **Sprint 4 的 0-1 背包纯函数与可解释输出（Task 4.1–Task 4.3）**。项目不包含账号、后端、云数据库或 AI；背包算法尚未接入界面。
 
 ## 当前已实现
 
@@ -85,7 +85,8 @@ star-map-backpack/
 │  │  └─ sampleCourses.test.ts 示例课程完整性测试
 │  ├─ algorithms/
 │  │  ├─ knapsack.ts           0-1 背包纯函数：预算、收益、取舍与理由生成
-│  │  └─ knapsack.test.ts      算法边界、最优性、理由与纯函数测试
+│  │  ├─ knapsack.test.ts      算法边界、最优性、理由与纯函数测试
+│  │  └─ knapsack.sample.test.ts 两套示例课程集成测试与暴力枚举校验
 │  ├─ parsers/
 │  │  ├─ noteParser.ts         Markdown/TXT 解析器核心函数
 │  │  ├─ noteParser.test.ts    解析器单元测试
@@ -188,13 +189,14 @@ star-map-backpack/
 - 理由：每个 decision 含 `reason.code`、`reason.params` 与可展示 `message`；`describeReason(reason)` 可由结构化参数复现文案。
 - 理由代码：`selected-in-route`（选中）、`skipped-over-budget`（超出预算）、`skipped-no-mastery-gap`（掌握度已满）、`skipped-pending-parameters`（参数待设置）、`skipped-invalid-parameters`（参数非法）、`skipped-not-in-route`（未进入最优组合）。
 - 待设置与非法参数理由会列出具体字段与当前值；未入选理由会引用自身收益与选中组合总收益。
-- 当前未接入界面；算法测试随 `npm test` 运行。
+- 测试：`npm test` 同时运行边界/理由单测与两套示例课程集成测试；集成测试覆盖预算 0、超预算、全选、复习池过滤、确定性与多档预算，并用暴力枚举校验最优总收益。
+- 当前未接入界面。
 
 ## 后续路线
 
 1. Sprint 2：Markdown/TXT 解析、知识点映射、笔记导入与计算机组成原理示例课程（已完成）
 2. Sprint 3：节点编辑面板、分值与掌握度更新（Task 3.1、Task 3.2 已完成）
-3. Sprint 4：`src/algorithms/` 独立 0-1 背包算法与测试（Task 4.1、Task 4.2 已完成；Task 4.3 待办）
+3. Sprint 4：`src/algorithms/` 独立 0-1 背包算法与测试（Task 4.1–Task 4.3 已完成）
 4. Sprint 5：算法与星图联动、航线动画、时间滑块
 5. Sprint 6：学习记录、状态更新、分享海报
 6. Sprint 7：AI 接口、异常处理与最终 UI 打磨

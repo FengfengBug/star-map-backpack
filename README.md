@@ -17,7 +17,7 @@
 - 载入示例笔记、恢复初始布局
 - 桌面与移动端响应式布局
 
-尚未实现、且界面上已明确标注为后续阶段的功能：Markdown/TXT 笔记导入界面（解析器核心已在 Task 2.1 完成）、节点编辑、0-1 背包航线规划、学习记录、AI 能力。
+尚未实现、且界面上已明确标注为后续阶段的功能：Markdown/TXT 笔记导入界面（解析与映射核心已分别由 Task 2.1、Task 2.2 完成）、节点编辑、0-1 背包航线规划、学习记录、AI 能力。
 
 ## 技术栈
 
@@ -68,7 +68,9 @@ star-map-backpack/
 │  │  └─ sampleCourse.ts       示例课程、章节与知识点
 │  ├─ parsers/
 │  │  ├─ noteParser.ts         Markdown/TXT 解析器核心函数
-│  │  └─ noteParser.test.ts    解析器单元测试
+│  │  ├─ noteParser.test.ts    解析器单元测试
+│  │  ├─ toKnowledgeNodes.ts   解析草稿到节点与关联边映射
+│  │  └─ toKnowledgeNodes.test.ts 映射单元测试
 │  ├─ styles/
 │  │  └─ base.css              设计令牌、基础样式
 │  ├─ types/
@@ -135,6 +137,7 @@ star-map-backpack/
 
 - 深蓝黑宇宙背景，星体仅使用蓝、青、紫与少量金色，避免高频随机动画。
 - 组件样式与业务逻辑分离，节点/边转换和存储逻辑位于 `src/utils/`。
+- 解析与映射位于 `src/parsers/`：`parseNote` 负责结构解析，`toKnowledgeNodes` 生成节点并按同级相邻关系生成去重关联边；映射不伪造分值、掌握度或时间。
 - 当前阶段所有交互均基于真实状态；未实现的解析与算法入口以禁用状态明确标注，不使用假数据伪装功能。
 - 已适配 1440、1280 与 390 宽度，并支持 `prefers-reduced-motion`。
 

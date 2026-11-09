@@ -511,7 +511,7 @@ function PreviewStep({
                 <Info size={14} strokeWidth={2} aria-hidden="true" />
                 <div>
                   <strong>参数不会自动生成</strong>
-                  <p>分值占比、掌握度与复习时间将在导入后保持“待设置”，需在 Sprint 3 由你补充。</p>
+                  <p>分值占比、掌握度与复习时间将在导入后保持“待设置”，需在右侧详情面板点击“编辑”由你补充。</p>
                 </div>
               </div>
 
@@ -589,7 +589,7 @@ function ConfirmStep({ result, stats, currentNodeCount }: ConfirmStepProps) {
           </h4>
           <ul>
             <li>分值占比、掌握度、预计复习时间不会自动生成</li>
-            <li>导入后显示为“待设置”，在 Sprint 3 节点编辑中补充</li>
+            <li>导入后显示为“待设置”，在右侧详情面板点击“编辑”补充</li>
             <li>导入结果仅保存在本次会话，刷新页面会恢复示例笔记</li>
           </ul>
         </section>

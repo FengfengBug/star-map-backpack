@@ -26,6 +26,14 @@ export interface KnowledgePoint {
   relatedIds: string[];
 }
 
+export interface KnowledgePointEditableFields {
+  title: string;
+  content: string;
+  scoreShare: number | null;
+  estimatedMinutes: number | null;
+  mastery: number | null;
+}
+
 export interface KnowledgeNodeData extends Record<string, unknown> {
   title: string;
   content: string;

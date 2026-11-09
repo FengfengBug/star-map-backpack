@@ -31,20 +31,29 @@ import type {
   KnowledgeFlowEdge,
   KnowledgeFlowNode,
   KnowledgePoint,
+  KnowledgePointEditableFields,
 } from './types/knowledge';
 import type { NoteSourceSummary } from './types/noteSource';
 import {
   createKnowledgeEdges,
   createKnowledgeNodes,
 } from './utils/knowledgeGraph';
+import { formatMastery, formatScoreShare } from './utils/star';
 import {
+  applySavedNodeEdits,
   clearNodePositions,
+  loadNodeEdits,
   loadNodePositions,
+  saveNodeEdit,
   saveNodePositions,
 } from './utils/storage';
 import './App.css';
 
 const INITIAL_SELECTED_NODE_ID = 'binary-tree';
+
+function getSampleCourseEditKey(courseId: SampleCourseId) {
+  return `sample:${courseId}`;
+}
 
 const SAMPLE_NOTE_SOURCE: NoteSourceSummary = {
   fileName: sampleNote.fileName,
@@ -61,13 +70,29 @@ function withSelection(nodes: KnowledgeFlowNode[], selectedNodeId: string | null
   }));
 }
 
+function applyNodeFields(
+  node: KnowledgeFlowNode,
+  fields: KnowledgePointEditableFields,
+): KnowledgeFlowNode {
+  return {
+    ...node,
+    ariaLabel: `知识点：${fields.title}，分值占比 ${formatScoreShare(fields.scoreShare)}，掌握度 ${formatMastery(fields.mastery)}`,
+    data: { ...node.data, ...fields },
+  };
+}
+
 interface ToastState {
   id: number;
   message: string;
 }
 
 function StarMapWorkspace() {
-  const [coursePoints, setCoursePoints] = useState<KnowledgePoint[]>(sampleKnowledgePoints);
+  const [coursePoints, setCoursePoints] = useState<KnowledgePoint[]>(() =>
+    applySavedNodeEdits(
+      sampleKnowledgePoints,
+      loadNodeEdits(getSampleCourseEditKey(defaultSampleCourseId)),
+    ),
+  );
   const [courseChapters, setCourseChapters] = useState<ChapterDefinition[]>(chapters);
   const [courseTitle, setCourseTitle] = useState(sampleCourse.title);
   const [noteSource, setNoteSource] = useState<NoteSourceSummary>(SAMPLE_NOTE_SOURCE);
@@ -76,7 +101,7 @@ function StarMapWorkspace() {
   );
   const [initialNodes] = useState(() =>
     withSelection(
-      createKnowledgeNodes(sampleKnowledgePoints, loadNodePositions()),
+      createKnowledgeNodes(coursePoints, loadNodePositions()),
       INITIAL_SELECTED_NODE_ID,
     ),
   );
@@ -129,7 +154,11 @@ function StarMapWorkspace() {
   const loadSampleCourse = useCallback(
     (coursePackage: SampleCoursePackage) => {
       clearNodePositions();
-      setCoursePoints(coursePackage.points);
+      const points = applySavedNodeEdits(
+        coursePackage.points,
+        loadNodeEdits(getSampleCourseEditKey(coursePackage.id)),
+      );
+      setCoursePoints(points);
       setCourseChapters(coursePackage.chapters);
       setCourseTitle(coursePackage.course.title);
       setNoteSource({
@@ -141,16 +170,14 @@ function StarMapWorkspace() {
       });
       setActiveSampleCourseId(coursePackage.id);
 
-      const defaultSelection = coursePackage.points.some(
+      const defaultSelection = points.some(
         (point) => point.id === INITIAL_SELECTED_NODE_ID,
       )
         ? INITIAL_SELECTED_NODE_ID
-        : (coursePackage.points[0]?.id ?? null);
+        : (points[0]?.id ?? null);
 
       setSelectedNodeId(defaultSelection);
-      setNodes(
-        withSelection(createKnowledgeNodes(coursePackage.points), defaultSelection),
-      );
+      setNodes(withSelection(createKnowledgeNodes(points), defaultSelection));
       notify(`已载入「${coursePackage.course.title}」示例课程，可拖动星体调整布局`);
       fitMapToCanvas();
     },
@@ -171,6 +198,29 @@ function StarMapWorkspace() {
       if (coursePackage) loadSampleCourse(coursePackage);
     },
     [loadSampleCourse],
+  );
+
+  const handleSaveNode = useCallback(
+    (nodeId: string, fields: KnowledgePointEditableFields) => {
+      setCoursePoints((currentPoints) =>
+        currentPoints.map((point) =>
+          point.id === nodeId ? { ...point, ...fields } : point,
+        ),
+      );
+      setNodes((currentNodes) =>
+        currentNodes.map((node) =>
+          node.id === nodeId ? applyNodeFields(node, fields) : node,
+        ),
+      );
+
+      if (activeSampleCourseId) {
+        saveNodeEdit(getSampleCourseEditKey(activeSampleCourseId), nodeId, fields);
+        notify(`已更新「${fields.title}」并保存到本机`);
+      } else {
+        notify(`已更新「${fields.title}」，导入笔记的修改仅本次会话保留`);
+      }
+    },
+    [activeSampleCourseId, notify, setNodes],
   );
 
   const handleResetLayout = useCallback(() => {
@@ -284,6 +334,7 @@ function StarMapWorkspace() {
           relatedNodes={relatedNodes}
           onSelectNode={handleSelectNode}
           onClearSelection={() => handleSelectNode(null)}
+          onSaveNode={handleSaveNode}
         />
         <ReviewRoute
           nodes={nodes}

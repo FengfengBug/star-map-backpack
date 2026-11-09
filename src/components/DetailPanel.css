@@ -239,13 +239,13 @@
   line-height: 1.5;
 }
 
-.editor-static-tag {
+.editor-local-tag {
   flex: 0 0 auto;
   padding: 3px 6px;
-  border: 1px solid rgba(242, 200, 109, 0.22);
+  border: 1px solid rgba(126, 226, 188, 0.2);
   border-radius: 5px;
-  background: rgba(242, 200, 109, 0.06);
-  color: #e5c37d;
+  background: rgba(126, 226, 188, 0.06);
+  color: #8fd6bd;
   font-size: 8px;
   letter-spacing: 0.03em;
   white-space: nowrap;
@@ -372,27 +372,12 @@
   color: #e6a0a8;
 }
 
-.editor-notice {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  margin: 0;
-  padding: 8px 9px;
-  border: 1px solid rgba(126, 226, 188, 0.18);
-  border-radius: 7px;
-  background: rgba(126, 226, 188, 0.06);
-  color: #8fd6bd;
-  font-size: 9px;
-  line-height: 1.55;
-}
-
-.editor-notice svg,
-.editor-static-note svg {
+.editor-persist-note svg {
   flex: 0 0 auto;
   margin-top: 1px;
 }
 
-.editor-static-note {
+.editor-persist-note {
   display: flex;
   align-items: flex-start;
   gap: 6px;

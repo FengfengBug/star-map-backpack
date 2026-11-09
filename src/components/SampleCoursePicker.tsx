@@ -108,7 +108,7 @@ export function SampleCoursePicker({
 
         <div className="sample-modal__body">
           <p className="sample-notice">
-            以下为示例数据，参数可编辑；编辑能力将在 Sprint 3 开放。载入课程会替换当前星图与已保存布局，导入的笔记不会保留。
+            以下为示例数据，参数可在右侧详情面板编辑。载入课程会替换当前星图与已保存布局，导入的笔记不会保留。
           </p>
 
           <div className="sample-list" role="radiogroup" aria-label="示例课程列表">

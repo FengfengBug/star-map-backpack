@@ -95,7 +95,7 @@ export function Sidebar({
           <p className="note-file__excerpt">{noteSource.excerpt}</p>
           {noteSource.kind === 'sample' && (
             <p className="note-file__notice">
-              示例数据，参数可编辑 · 编辑能力将在 Sprint 3 开放
+              示例数据，参数可在右侧详情面板编辑
             </p>
           )}
           <div className="note-file__footer">

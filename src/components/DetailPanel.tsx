@@ -1,6 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { ArrowUpRight, Check, Info, MapPin, Pencil, X } from 'lucide-react';
-import type { ChapterDefinition, KnowledgeFlowNode } from '../types/knowledge';
+import type {
+  ChapterDefinition,
+  KnowledgeFlowNode,
+  KnowledgePointEditableFields,
+} from '../types/knowledge';
 import { getMasteryLabel } from '../utils/star';
 import { StarGlyph } from './StarGlyph';
 import './DetailPanel.css';
@@ -12,6 +16,7 @@ interface DetailPanelProps {
   relatedNodes: KnowledgeFlowNode[];
   onSelectNode: (nodeId: string) => void;
   onClearSelection: () => void;
+  onSaveNode: (nodeId: string, fields: KnowledgePointEditableFields) => void;
 }
 
 interface RelationRowProps {
@@ -55,7 +60,6 @@ interface NodeEditorFormProps {
   chapter: ChapterDefinition | null;
   draft: EditorDraft;
   errors: EditorErrors;
-  notice: string | null;
   onChange: (field: keyof EditorDraft, value: string) => void;
   onCancel: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -118,12 +122,16 @@ function validateEditorDraft(draft: EditorDraft): EditorErrors {
   return errors;
 }
 
+function parseOptionalInteger(value: string) {
+  const trimmed = value.trim();
+  return trimmed === '' ? null : Number(trimmed);
+}
+
 function NodeEditorForm({
   node,
   chapter,
   draft,
   errors,
-  notice,
   onChange,
   onCancel,
   onSubmit,
@@ -140,7 +148,7 @@ function NodeEditorForm({
           <span className="detail-chapter">{chapter?.label ?? '知识节点'}</span>
           <p>保存后星体尺寸与亮度同步变化。</p>
         </div>
-        <span className="editor-static-tag">静态预览</span>
+        <span className="editor-local-tag">本机保存</span>
       </div>
 
       <div className="editor-field">
@@ -281,16 +289,9 @@ function NodeEditorForm({
         </p>
       </div>
 
-      {notice && (
-        <p className="editor-notice" role="status">
-          <Check size={12} strokeWidth={2.2} aria-hidden="true" />
-          {notice}
-        </p>
-      )}
-
-      <p className="editor-static-note">
+      <p className="editor-persist-note">
         <Info size={12} strokeWidth={1.9} aria-hidden="true" />
-        当前为静态预览：只校验输入，不会写入星图或本地存储；确认后接入保存。
+        修改会同步到星图并保存在本机；导入笔记的修改仅本次会话有效。
       </p>
 
       <div className="editor-actions">
@@ -313,15 +314,14 @@ export function DetailPanel({
   relatedNodes,
   onSelectNode,
   onClearSelection,
+  onSaveNode,
 }: DetailPanelProps) {
   const [editorDraft, setEditorDraft] = useState<EditorDraft | null>(null);
   const [editorErrors, setEditorErrors] = useState<EditorErrors>({});
-  const [editorNotice, setEditorNotice] = useState<string | null>(null);
 
   useEffect(() => {
     setEditorDraft(null);
     setEditorErrors({});
-    setEditorNotice(null);
   }, [node?.id]);
 
   const isEditing = editorDraft !== null;
@@ -330,13 +330,11 @@ export function DetailPanel({
     if (!node) return;
     setEditorDraft(createEditorDraft(node));
     setEditorErrors({});
-    setEditorNotice(null);
   };
 
   const handleCancelEdit = () => {
     setEditorDraft(null);
     setEditorErrors({});
-    setEditorNotice(null);
   };
 
   const handleEditorChange = (field: keyof EditorDraft, value: string) => {
@@ -344,22 +342,25 @@ export function DetailPanel({
       currentDraft ? { ...currentDraft, [field]: value } : currentDraft,
     );
     setEditorErrors((currentErrors) => ({ ...currentErrors, [field]: undefined }));
-    setEditorNotice(null);
   };
 
   const handleEditorSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!editorDraft) return;
+    if (!node || !editorDraft) return;
 
     const nextErrors = validateEditorDraft(editorDraft);
     setEditorErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
 
-    if (Object.keys(nextErrors).length > 0) {
-      setEditorNotice(null);
-      return;
-    }
-
-    setEditorNotice('校验通过（静态预览，尚未写入星图）。');
+    onSaveNode(node.id, {
+      title: editorDraft.title.trim(),
+      content: editorDraft.content.trim(),
+      scoreShare: parseOptionalInteger(editorDraft.scoreShare),
+      estimatedMinutes: parseOptionalInteger(editorDraft.estimatedMinutes),
+      mastery: parseOptionalInteger(editorDraft.mastery),
+    });
+    setEditorDraft(null);
+    setEditorErrors({});
   };
 
   if (!node) {
@@ -438,7 +439,6 @@ export function DetailPanel({
             chapter={chapter}
             draft={editorDraft}
             errors={editorErrors}
-            notice={editorNotice}
             onChange={handleEditorChange}
             onCancel={handleCancelEdit}
             onSubmit={handleEditorSubmit}
@@ -523,7 +523,7 @@ export function DetailPanel({
           )}
           <p>
             {hasPendingMastery
-              ? '导入的知识点尚未设置掌握度；在 Sprint 3 节点编辑中补充后，星体亮度才会反映掌握程度。'
+              ? '导入的知识点尚未设置掌握度；点击右侧“编辑”补充后，星体亮度才会反映掌握程度。'
               : '星体亮度映射掌握程度，掌握越充分，星光越明亮。'}
           </p>
         </section>

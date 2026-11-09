@@ -61,7 +61,16 @@ export function ReviewRoute({ nodes, reviewWindowMinutes }: ReviewRouteProps) {
           </div>
           <div className="route-stat">
             <span>待复习</span>
-            <strong>{formatDuration(pendingMinutes)}</strong>
+            <strong
+              className={pendingMinutes === null ? 'is-pending' : undefined}
+              title={
+                pendingMinutes === null
+                  ? '导入的知识点尚未设置预计用时'
+                  : undefined
+              }
+            >
+              {pendingMinutes === null ? '待设置' : formatDuration(pendingMinutes)}
+            </strong>
           </div>
           <div className="route-stat">
             <span>可用</span>

@@ -5,10 +5,11 @@ import './Header.css';
 
 interface HeaderProps {
   courseTitle: string;
+  courseTag: '示例' | '导入';
   reviewWindowMinutes: number;
 }
 
-export function Header({ courseTitle, reviewWindowMinutes }: HeaderProps) {
+export function Header({ courseTitle, courseTag, reviewWindowMinutes }: HeaderProps) {
   return (
     <header className="topbar">
       <div className="brand" aria-label="星图背包">
@@ -28,7 +29,11 @@ export function Header({ courseTitle, reviewWindowMinutes }: HeaderProps) {
         <span className="context-label">当前课程</span>
         <span className="course-summary__row">
           <span className="course-summary__title">{courseTitle}</span>
-          <span className="demo-tag">示例</span>
+          <span
+            className={courseTag === '示例' ? 'demo-tag' : 'demo-tag demo-tag--imported'}
+          >
+            {courseTag}
+          </span>
         </span>
       </div>
 

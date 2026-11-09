@@ -1,7 +1,12 @@
 import type { CSSProperties } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { KnowledgeFlowNode } from '../types/knowledge';
-import { getStarIntensity, getStarSize } from '../utils/star';
+import {
+  formatMastery,
+  formatScoreShare,
+  getStarIntensity,
+  getStarSize,
+} from '../utils/star';
 import './StarNode.css';
 
 const handleStyle: CSSProperties = {
@@ -67,7 +72,7 @@ export function StarNode({ data, selected, dragging }: NodeProps<KnowledgeFlowNo
 
       <span
         className="star-node__label"
-        title={`${data.title} · 分值 ${data.scoreShare}% · 掌握度 ${data.mastery}%`}
+        title={`${data.title} · 分值占比 ${formatScoreShare(data.scoreShare)} · 掌握度 ${formatMastery(data.mastery)}`}
       >
         <span className="star-node__title">{data.title}</span>
         {data.reviewed && <span className="star-node__reviewed-dot" aria-hidden="true" />}

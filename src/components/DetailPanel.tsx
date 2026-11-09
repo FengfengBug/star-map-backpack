@@ -74,7 +74,9 @@ export function DetailPanel({
   }
 
   const relationCount = relatedNodes.length + (parentNode ? 1 : 0);
-  const masteryLabel = getMasteryLabel(node.data.mastery);
+  const masteryLabel =
+    node.data.mastery === null ? null : getMasteryLabel(node.data.mastery);
+  const hasPendingMastery = node.data.mastery === null;
 
   return (
     <aside
@@ -127,38 +129,58 @@ export function DetailPanel({
         <div className="detail-facts">
           <div className="detail-fact">
             <span>分值占比</span>
-            <strong>
-              {node.data.scoreShare}
-              <small>%</small>
-            </strong>
+            {node.data.scoreShare === null ? (
+              <strong className="is-pending">待设置</strong>
+            ) : (
+              <strong>
+                {node.data.scoreShare}
+                <small>%</small>
+              </strong>
+            )}
           </div>
           <div className="detail-fact">
             <span>预计用时</span>
-            <strong>
-              {node.data.estimatedMinutes}
-              <small> min</small>
-            </strong>
+            {node.data.estimatedMinutes === null ? (
+              <strong className="is-pending">待设置</strong>
+            ) : (
+              <strong>
+                {node.data.estimatedMinutes}
+                <small> min</small>
+              </strong>
+            )}
           </div>
         </div>
 
         <section className="mastery-card" aria-label="掌握度">
           <div className="mastery-card__head">
             <span>掌握度</span>
-            <strong>
-              {node.data.mastery}%<small>{masteryLabel}</small>
-            </strong>
+            {hasPendingMastery ? (
+              <strong className="is-pending">待设置</strong>
+            ) : (
+              <strong>
+                {node.data.mastery}%<small>{masteryLabel}</small>
+              </strong>
+            )}
           </div>
-          <div
-            className="mastery-bar"
-            role="progressbar"
-            aria-label="知识点掌握度"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={node.data.mastery}
-          >
-            <span style={{ width: `${node.data.mastery}%` }} />
-          </div>
-          <p>星体亮度映射掌握程度，掌握越充分，星光越明亮。</p>
+          {hasPendingMastery ? (
+            <div className="mastery-bar mastery-bar--pending" aria-hidden="true" />
+          ) : (
+            <div
+              className="mastery-bar"
+              role="progressbar"
+              aria-label="知识点掌握度"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={node.data.mastery ?? undefined}
+            >
+              <span style={{ width: `${node.data.mastery ?? 0}%` }} />
+            </div>
+          )}
+          <p>
+            {hasPendingMastery
+              ? '导入的知识点尚未设置掌握度；在 Sprint 3 节点编辑中补充后，星体亮度才会反映掌握程度。'
+              : '星体亮度映射掌握程度，掌握越充分，星光越明亮。'}
+          </p>
         </section>
 
         <section className="relations" aria-labelledby="relations-heading">

@@ -217,6 +217,12 @@
   white-space: nowrap;
 }
 
+.route-stat strong.is-pending {
+  color: var(--pending);
+  font-size: 11px;
+  letter-spacing: 0;
+}
+
 .route-stat strong small {
   color: var(--muted-2);
   font-family: var(--font-sans);

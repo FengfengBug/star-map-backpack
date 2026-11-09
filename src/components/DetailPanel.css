@@ -204,6 +204,13 @@
   letter-spacing: 0;
 }
 
+.detail-fact strong.is-pending {
+  color: var(--pending);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
 .mastery-card {
   margin-top: 9px;
   padding: 11px;
@@ -232,6 +239,13 @@
   font-weight: 500;
 }
 
+.mastery-card__head strong.is-pending {
+  color: var(--pending);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
 .mastery-card__head small {
   margin-left: 5px;
   color: var(--muted);
@@ -254,6 +268,12 @@
   border-radius: inherit;
   background: linear-gradient(90deg, color-mix(in srgb, var(--tone) 46%, transparent), var(--tone));
   box-shadow: 0 0 8px color-mix(in srgb, var(--tone) 22%, transparent);
+}
+
+.mastery-bar.mastery-bar--pending {
+  height: 5px;
+  border: 1px dashed color-mix(in srgb, var(--pending) 26%, transparent);
+  background: color-mix(in srgb, var(--pending) 6%, transparent);
 }
 
 .mastery-card p {

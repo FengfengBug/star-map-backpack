@@ -18,14 +18,20 @@ const MIN_SCORE_SHARE = 4;
 const MAX_SCORE_SHARE = 12;
 const MIN_STAR_SIZE = 28;
 const MAX_STAR_SIZE = 56;
+const PENDING_STAR_SIZE = 32;
+const PENDING_STAR_INTENSITY = 0.5;
 
-export function getStarSize(scoreShare: number) {
+export function getStarSize(scoreShare: number | null) {
+  if (scoreShare === null) return PENDING_STAR_SIZE;
+
   const clamped = Math.min(Math.max(scoreShare, MIN_SCORE_SHARE), MAX_SCORE_SHARE);
   const ratio = (clamped - MIN_SCORE_SHARE) / (MAX_SCORE_SHARE - MIN_SCORE_SHARE);
   return Math.round(MIN_STAR_SIZE + ratio * (MAX_STAR_SIZE - MIN_STAR_SIZE));
 }
 
-export function getStarIntensity(mastery: number) {
+export function getStarIntensity(mastery: number | null) {
+  if (mastery === null) return PENDING_STAR_INTENSITY;
+
   return Number((0.46 + (Math.min(Math.max(mastery, 0), 100) / 100) * 0.54).toFixed(2));
 }
 
@@ -34,6 +40,18 @@ export function getMasteryLabel(mastery: number) {
   if (mastery >= 70) return '基本熟练';
   if (mastery >= 45) return '仍需巩固';
   return '优先复习';
+}
+
+export function formatScoreShare(scoreShare: number | null) {
+  return scoreShare === null ? '待设置' : `${scoreShare}%`;
+}
+
+export function formatMastery(mastery: number | null) {
+  return mastery === null ? '待设置' : `${mastery}%`;
+}
+
+export function formatEstimatedMinutes(minutes: number | null) {
+  return minutes === null ? '待设置' : `${minutes} min`;
 }
 
 export function formatDuration(minutes: number) {

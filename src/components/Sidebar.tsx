@@ -1,7 +1,9 @@
 import { useCallback, useState } from 'react';
 import { Check, FileText, RefreshCw, Sparkles, Upload } from 'lucide-react';
-import { sampleCourse, sampleNote } from '../data/sampleCourse';
+import type { ImportedCourse } from '../parsers/importedNote';
 import type { ChapterDefinition, KnowledgeFlowNode } from '../types/knowledge';
+import type { NoteSourceSummary } from '../types/noteSource';
+import { formatMastery, formatScoreShare } from '../utils/star';
 import { NoteImportPreview } from './NoteImportPreview';
 import { StarGlyph } from './StarGlyph';
 import './Sidebar.css';
@@ -12,7 +14,8 @@ interface SidebarProps {
   selectedNodeId: string | null;
   onSelectNode: (nodeId: string) => void;
   onLoadSample: () => void;
-  onPreviewConfirm: () => void;
+  noteSource: NoteSourceSummary;
+  onImportConfirm: (course: ImportedCourse) => void;
 }
 
 export function Sidebar({
@@ -21,15 +24,19 @@ export function Sidebar({
   selectedNodeId,
   onSelectNode,
   onLoadSample,
-  onPreviewConfirm,
+  noteSource,
+  onImportConfirm,
 }: SidebarProps) {
   const [isImportPreviewOpen, setIsImportPreviewOpen] = useState(false);
 
   const closeImportPreview = useCallback(() => setIsImportPreviewOpen(false), []);
-  const handlePreviewConfirm = useCallback(() => {
-    setIsImportPreviewOpen(false);
-    onPreviewConfirm();
-  }, [onPreviewConfirm]);
+  const handleImportConfirm = useCallback(
+    (course: ImportedCourse) => {
+      setIsImportPreviewOpen(false);
+      onImportConfirm(course);
+    },
+    [onImportConfirm],
+  );
 
   return (
     <>
@@ -57,19 +64,26 @@ export function Sidebar({
               <FileText size={17} strokeWidth={1.7} />
             </span>
             <div className="note-file__identity">
-              <h3 title={sampleNote.fileName}>{sampleNote.fileName}</h3>
-              <span>{sampleCourse.subtitle}</span>
+              <h3 title={noteSource.fileName}>{noteSource.fileName}</h3>
+              <span>{noteSource.subtitle}</span>
             </div>
-            <span className="demo-tag">示例</span>
+            <span
+              className={
+                noteSource.kind === 'sample' ? 'demo-tag' : 'demo-tag demo-tag--imported'
+              }
+            >
+              {noteSource.kind === 'sample' ? '示例' : '导入'}
+            </span>
           </div>
-          <p className="note-file__excerpt">{sampleNote.excerpt}</p>
+          <p className="note-file__excerpt">{noteSource.excerpt}</p>
           <div className="note-file__footer">
             <span className="note-file__loaded">
               <Check size={11} strokeWidth={2.5} aria-hidden="true" />
               已载入星图
             </span>
             <span>
-              {sampleNote.characterCount.toLocaleString('zh-CN')} 字 · {nodes.length} 个知识点
+              {noteSource.characterCount.toLocaleString('zh-CN')} 字 · {nodes.length}{' '}
+              个知识点
             </span>
           </div>
         </div>
@@ -84,14 +98,18 @@ export function Sidebar({
             className="button button--import"
             onClick={() => setIsImportPreviewOpen(true)}
             aria-haspopup="dialog"
-            title="查看笔记导入的静态预览"
+            title="导入 Markdown / TXT 笔记"
           >
             <Upload size={14} strokeWidth={1.9} aria-hidden="true" />
             导入笔记
-            <span className="button__badge button__badge--preview">静态预览</span>
+            <span className="button__badge">MD / TXT</span>
           </button>
         </div>
-        <p className="note-source__hint">导入界面为静态预览，尚未接入真实解析</p>
+        <p className="note-source__hint">
+          {noteSource.kind === 'sample'
+            ? '支持 Markdown / TXT 文件；导入将替换当前星图'
+            : '导入结果仅保存在本次会话，刷新后恢复示例笔记'}
+        </p>
       </section>
 
       <div className="sidebar__rule" aria-hidden="true" />
@@ -119,6 +137,8 @@ export function Sidebar({
                 <ul className="outline-list">
                   {chapterNodes.map((node) => {
                     const isSelected = node.id === selectedNodeId;
+                    const scoreLabel = formatScoreShare(node.data.scoreShare);
+                    const masteryLabel = formatMastery(node.data.mastery);
 
                     return (
                       <li key={node.id}>
@@ -134,7 +154,7 @@ export function Sidebar({
                             .join(' ')}
                           onClick={() => onSelectNode(node.id)}
                           aria-pressed={isSelected}
-                          title={`${node.data.title} · 掌握度 ${node.data.mastery}%`}
+                          title={`${node.data.title} · 分值占比 ${scoreLabel} · 掌握度 ${masteryLabel}`}
                         >
                           <StarGlyph
                             tone={node.data.tone}
@@ -142,7 +162,16 @@ export function Sidebar({
                             className="knowledge-row__star"
                           />
                           <span className="knowledge-row__title">{node.data.title}</span>
-                          <span className="knowledge-row__score">{node.data.scoreShare}%</span>
+                          <span
+                            className={[
+                              'knowledge-row__score',
+                              node.data.scoreShare === null ? 'is-pending' : '',
+                            ]
+                              .filter(Boolean)
+                              .join(' ')}
+                          >
+                            {scoreLabel}
+                          </span>
                         </button>
                       </li>
                     );
@@ -159,7 +188,7 @@ export function Sidebar({
       <NoteImportPreview
         currentNodeCount={nodes.length}
         onClose={closeImportPreview}
-        onPreviewConfirm={handlePreviewConfirm}
+        onConfirm={handleImportConfirm}
       />
     )}
     </>

@@ -149,12 +149,6 @@
   letter-spacing: 0.03em;
 }
 
-.button__badge--preview {
-  border-color: rgba(242, 200, 109, 0.2);
-  background: rgba(242, 200, 109, 0.055);
-  color: #cdb27a;
-}
-
 .note-source__hint {
   margin: 7px 0 0;
   color: var(--muted-2);
@@ -320,6 +314,11 @@
   color: var(--muted-2);
   font-family: var(--font-mono);
   font-size: 9px;
+}
+
+.knowledge-row__score.is-pending {
+  color: var(--pending);
+  font-family: var(--font-sans);
 }
 
 .knowledge-row.is-selected .knowledge-row__score {

@@ -1,4 +1,5 @@
 import type { KnowledgeFlowEdge, KnowledgeFlowNode, KnowledgePoint } from '../types/knowledge';
+import { formatMastery, formatScoreShare } from './star';
 import type { SavedNodePositions } from './storage';
 
 export function createKnowledgeNodes(
@@ -9,7 +10,7 @@ export function createKnowledgeNodes(
     id: point.id,
     type: 'knowledge',
     position: savedPositions[point.id] ?? point.position,
-    ariaLabel: `知识点：${point.title}，分值占比 ${point.scoreShare}%，掌握度 ${point.mastery}%`,
+    ariaLabel: `知识点：${point.title}，分值占比 ${formatScoreShare(point.scoreShare)}，掌握度 ${formatMastery(point.mastery)}`,
     ariaRole: 'button',
     focusable: true,
     data: {
@@ -74,7 +75,11 @@ export function createKnowledgeEdges(
 }
 
 export function sumPendingMinutes(nodes: KnowledgeFlowNode[]) {
-  return nodes
-    .filter((node) => !node.data.reviewed)
-    .reduce((total, node) => total + node.data.estimatedMinutes, 0);
+  const pendingNodes = nodes.filter((node) => !node.data.reviewed);
+
+  if (pendingNodes.some((node) => node.data.estimatedMinutes === null)) {
+    return null;
+  }
+
+  return pendingNodes.reduce((total, node) => total + (node.data.estimatedMinutes ?? 0), 0);
 }

@@ -2,7 +2,7 @@ import type { Edge, Node, XYPosition } from '@xyflow/react';
 
 export type StarTone = 'blue' | 'cyan' | 'violet' | 'gold';
 
-export type ChapterId = 'foundation' | 'trees' | 'graphs' | 'algorithms';
+export type ChapterId = string;
 
 export interface ChapterDefinition {
   id: ChapterId;
@@ -16,9 +16,9 @@ export interface KnowledgePoint {
   title: string;
   content: string;
   parentId: string | null;
-  scoreShare: number;
-  mastery: number;
-  estimatedMinutes: number;
+  scoreShare: number | null;
+  mastery: number | null;
+  estimatedMinutes: number | null;
   reviewed: boolean;
   position: XYPosition;
   chapterId: ChapterId;
@@ -30,9 +30,9 @@ export interface KnowledgeNodeData extends Record<string, unknown> {
   title: string;
   content: string;
   parentId: string | null;
-  scoreShare: number;
-  mastery: number;
-  estimatedMinutes: number;
+  scoreShare: number | null;
+  mastery: number | null;
+  estimatedMinutes: number | null;
   reviewed: boolean;
   chapterId: ChapterId;
   tone: StarTone;

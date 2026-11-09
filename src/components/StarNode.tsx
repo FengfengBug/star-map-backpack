@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { memo, type CSSProperties } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { KnowledgeFlowNode } from '../types/knowledge';
 import {
@@ -24,7 +24,7 @@ const handleStyle: CSSProperties = {
   transform: 'translate(-50%, -50%)',
 };
 
-export function StarNode({ data, selected, dragging }: NodeProps<KnowledgeFlowNode>) {
+function StarNodeComponent({ data, selected, dragging }: NodeProps<KnowledgeFlowNode>) {
   const starSize = getStarSize(data.scoreShare);
   const intensity = getStarIntensity(data.mastery);
   const nodeStyle = {
@@ -80,3 +80,12 @@ export function StarNode({ data, selected, dragging }: NodeProps<KnowledgeFlowNo
     </div>
   );
 }
+
+// 编辑预览只替换当前节点 data，其余节点无需跟随重渲染。
+export const StarNode = memo(
+  StarNodeComponent,
+  (previous, next) =>
+    previous.data === next.data &&
+    previous.selected === next.selected &&
+    previous.dragging === next.dragging,
+);

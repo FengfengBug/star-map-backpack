@@ -1,9 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ArrowUpRight, Check, Info, MapPin, Pencil, X } from 'lucide-react';
 import type {
   ChapterDefinition,
   KnowledgeFlowNode,
   KnowledgePointEditableFields,
+  KnowledgePointParameterFields,
 } from '../types/knowledge';
 import { getMasteryLabel } from '../utils/star';
 import { RangeNumberField } from './inputs/RangeNumberField';
@@ -18,6 +19,10 @@ interface DetailPanelProps {
   onSelectNode: (nodeId: string) => void;
   onClearSelection: () => void;
   onSaveNode: (nodeId: string, fields: KnowledgePointEditableFields) => void;
+  onPreviewNode: (
+    nodeId: string,
+    parameters: KnowledgePointParameterFields | null,
+  ) => void;
 }
 
 interface RelationRowProps {
@@ -147,7 +152,7 @@ function NodeEditorForm({
         </span>
         <div className="editor-hero__copy">
           <span className="detail-chapter">{chapter?.label ?? '知识节点'}</span>
-          <p>保存后星体尺寸与亮度同步变化。</p>
+          <p>拖动滑块可实时预览星体尺寸与亮度；标题与摘要保存后生效。</p>
         </div>
         <span className="editor-local-tag">本机保存</span>
       </div>
@@ -265,14 +270,24 @@ export function DetailPanel({
   onSelectNode,
   onClearSelection,
   onSaveNode,
+  onPreviewNode,
 }: DetailPanelProps) {
   const [editorDraft, setEditorDraft] = useState<EditorDraft | null>(null);
   const [editorErrors, setEditorErrors] = useState<EditorErrors>({});
+  const previewingNodeIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (
+      previewingNodeIdRef.current &&
+      previewingNodeIdRef.current !== node?.id
+    ) {
+      onPreviewNode(previewingNodeIdRef.current, null);
+      previewingNodeIdRef.current = null;
+    }
+
     setEditorDraft(null);
     setEditorErrors({});
-  }, [node?.id]);
+  }, [node?.id, onPreviewNode]);
 
   const isEditing = editorDraft !== null;
 
@@ -283,15 +298,30 @@ export function DetailPanel({
   };
 
   const handleCancelEdit = () => {
+    if (previewingNodeIdRef.current) {
+      onPreviewNode(previewingNodeIdRef.current, null);
+      previewingNodeIdRef.current = null;
+    }
+
     setEditorDraft(null);
     setEditorErrors({});
   };
 
   const handleEditorChange = (field: keyof EditorDraft, value: string) => {
-    setEditorDraft((currentDraft) =>
-      currentDraft ? { ...currentDraft, [field]: value } : currentDraft,
-    );
+    if (!editorDraft) return;
+
+    const nextDraft = { ...editorDraft, [field]: value };
+    setEditorDraft(nextDraft);
     setEditorErrors((currentErrors) => ({ ...currentErrors, [field]: undefined }));
+
+    if (node && field !== 'title' && field !== 'content') {
+      previewingNodeIdRef.current = node.id;
+      onPreviewNode(node.id, {
+        scoreShare: parseOptionalInteger(nextDraft.scoreShare),
+        estimatedMinutes: parseOptionalInteger(nextDraft.estimatedMinutes),
+        mastery: parseOptionalInteger(nextDraft.mastery),
+      });
+    }
   };
 
   const handleEditorSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -309,6 +339,7 @@ export function DetailPanel({
       estimatedMinutes: parseOptionalInteger(editorDraft.estimatedMinutes),
       mastery: parseOptionalInteger(editorDraft.mastery),
     });
+    previewingNodeIdRef.current = null;
     setEditorDraft(null);
     setEditorErrors({});
   };

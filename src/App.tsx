@@ -32,6 +32,7 @@ import type {
   KnowledgeFlowNode,
   KnowledgePoint,
   KnowledgePointEditableFields,
+  KnowledgePointParameterFields,
 } from './types/knowledge';
 import type { NoteSourceSummary } from './types/noteSource';
 import {
@@ -78,6 +79,17 @@ function applyNodeFields(
     ...node,
     ariaLabel: `知识点：${fields.title}，分值占比 ${formatScoreShare(fields.scoreShare)}，掌握度 ${formatMastery(fields.mastery)}`,
     data: { ...node.data, ...fields },
+  };
+}
+
+function applyNodeParameters(
+  node: KnowledgeFlowNode,
+  parameters: KnowledgePointParameterFields,
+): KnowledgeFlowNode {
+  return {
+    ...node,
+    ariaLabel: `知识点：${node.data.title}，分值占比 ${formatScoreShare(parameters.scoreShare)}，掌握度 ${formatMastery(parameters.mastery)}`,
+    data: { ...node.data, ...parameters },
   };
 }
 
@@ -223,6 +235,37 @@ function StarMapWorkspace() {
     [activeSampleCourseId, notify, setNodes],
   );
 
+  const handlePreviewNode = useCallback(
+    (nodeId: string, parameters: KnowledgePointParameterFields | null) => {
+      if (parameters) {
+        setNodes((currentNodes) =>
+          currentNodes.map((node) =>
+            node.id === nodeId ? applyNodeParameters(node, parameters) : node,
+          ),
+        );
+        return;
+      }
+
+      const point = coursePoints.find((candidate) => candidate.id === nodeId);
+      if (!point) return;
+
+      setNodes((currentNodes) =>
+        currentNodes.map((node) =>
+          node.id === nodeId
+            ? applyNodeFields(node, {
+                title: point.title,
+                content: point.content,
+                scoreShare: point.scoreShare,
+                estimatedMinutes: point.estimatedMinutes,
+                mastery: point.mastery,
+              })
+            : node,
+        ),
+      );
+    },
+    [coursePoints, setNodes],
+  );
+
   const handleResetLayout = useCallback(() => {
     setNodes(
       withSelection(createKnowledgeNodes(coursePoints), selectedNodeId),
@@ -278,9 +321,10 @@ function StarMapWorkspace() {
     [getNodes],
   );
 
+  // 编辑预览只更新 nodes，不重建边；边仅依赖课程数据与选中态。
   const edges = useMemo(
-    () => createKnowledgeEdges(nodes, selectedNodeId),
-    [nodes, selectedNodeId],
+    () => createKnowledgeEdges(createKnowledgeNodes(coursePoints), selectedNodeId),
+    [coursePoints, selectedNodeId],
   );
 
   const selectedNode = selectedNodeId
@@ -335,6 +379,7 @@ function StarMapWorkspace() {
           onSelectNode={handleSelectNode}
           onClearSelection={() => handleSelectNode(null)}
           onSaveNode={handleSaveNode}
+          onPreviewNode={handlePreviewNode}
         />
         <ReviewRoute
           nodes={nodes}

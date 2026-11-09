@@ -34,6 +34,11 @@ export interface KnowledgePointEditableFields {
   mastery: number | null;
 }
 
+export type KnowledgePointParameterFields = Pick<
+  KnowledgePointEditableFields,
+  'scoreShare' | 'estimatedMinutes' | 'mastery'
+>;
+
 export interface KnowledgeNodeData extends Record<string, unknown> {
   title: string;
   content: string;

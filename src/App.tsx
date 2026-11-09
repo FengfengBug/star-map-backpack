@@ -119,6 +119,10 @@ function StarMapWorkspace() {
     fitMapToCanvas();
   }, [fitMapToCanvas, notify, selectedNodeId, setNodes]);
 
+  const handleImportPreviewConfirm = useCallback(() => {
+    notify('静态预览：确认操作未写入星图');
+  }, [notify]);
+
   const handleNodesChange = useCallback<OnNodesChange<KnowledgeFlowNode>>(
     (changes) => {
       const selectionChange = changes.find(
@@ -178,6 +182,7 @@ function StarMapWorkspace() {
           selectedNodeId={selectedNodeId}
           onSelectNode={handleSelectNode}
           onLoadSample={handleLoadSample}
+          onPreviewConfirm={handleImportPreviewConfirm}
         />
         <KnowledgeGraph
           nodes={nodes}

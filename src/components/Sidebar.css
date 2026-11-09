@@ -126,6 +126,18 @@
   min-height: 33px;
 }
 
+.button--import {
+  border-color: rgba(124, 160, 226, 0.16);
+  background: rgba(116, 151, 221, 0.05);
+  color: var(--text-soft);
+}
+
+.button--import:hover {
+  border-color: rgba(142, 190, 255, 0.3);
+  background: rgba(116, 151, 221, 0.1);
+  color: var(--text);
+}
+
 .button__badge {
   margin-left: auto;
   padding: 2px 5px;
@@ -135,6 +147,12 @@
   font-size: 8px;
   font-weight: 500;
   letter-spacing: 0.03em;
+}
+
+.button__badge--preview {
+  border-color: rgba(242, 200, 109, 0.2);
+  background: rgba(242, 200, 109, 0.055);
+  color: #cdb27a;
 }
 
 .note-source__hint {

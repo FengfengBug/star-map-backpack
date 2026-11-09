@@ -1,6 +1,8 @@
+import { useCallback, useState } from 'react';
 import { Check, FileText, RefreshCw, Sparkles, Upload } from 'lucide-react';
 import { sampleCourse, sampleNote } from '../data/sampleCourse';
 import type { ChapterDefinition, KnowledgeFlowNode } from '../types/knowledge';
+import { NoteImportPreview } from './NoteImportPreview';
 import { StarGlyph } from './StarGlyph';
 import './Sidebar.css';
 
@@ -10,6 +12,7 @@ interface SidebarProps {
   selectedNodeId: string | null;
   onSelectNode: (nodeId: string) => void;
   onLoadSample: () => void;
+  onPreviewConfirm: () => void;
 }
 
 export function Sidebar({
@@ -18,8 +21,18 @@ export function Sidebar({
   selectedNodeId,
   onSelectNode,
   onLoadSample,
+  onPreviewConfirm,
 }: SidebarProps) {
+  const [isImportPreviewOpen, setIsImportPreviewOpen] = useState(false);
+
+  const closeImportPreview = useCallback(() => setIsImportPreviewOpen(false), []);
+  const handlePreviewConfirm = useCallback(() => {
+    setIsImportPreviewOpen(false);
+    onPreviewConfirm();
+  }, [onPreviewConfirm]);
+
   return (
+    <>
     <aside className="sidebar panel" aria-label="笔记与知识点目录">
       <section className="note-source" aria-labelledby="note-source-heading">
         <div className="section-heading">
@@ -68,16 +81,17 @@ export function Sidebar({
           </button>
           <button
             type="button"
-            className="button button--quiet"
-            disabled
-            title="Markdown / TXT 自动解析将在下一阶段接入"
+            className="button button--import"
+            onClick={() => setIsImportPreviewOpen(true)}
+            aria-haspopup="dialog"
+            title="查看笔记导入的静态预览"
           >
             <Upload size={14} strokeWidth={1.9} aria-hidden="true" />
             导入笔记
-            <span className="button__badge">下一阶段</span>
+            <span className="button__badge button__badge--preview">静态预览</span>
           </button>
         </div>
-        <p className="note-source__hint">当前版本使用示例笔记呈现知识星图</p>
+        <p className="note-source__hint">导入界面为静态预览，尚未接入真实解析</p>
       </section>
 
       <div className="sidebar__rule" aria-hidden="true" />
@@ -140,5 +154,14 @@ export function Sidebar({
         </nav>
       </section>
     </aside>
+
+    {isImportPreviewOpen && (
+      <NoteImportPreview
+        currentNodeCount={nodes.length}
+        onClose={closeImportPreview}
+        onPreviewConfirm={handlePreviewConfirm}
+      />
+    )}
+    </>
   );
 }

@@ -321,42 +321,6 @@
   resize: vertical;
 }
 
-.editor-number {
-  position: relative;
-}
-
-.editor-number .editor-input {
-  padding-right: 30px;
-}
-
-.editor-number > span {
-  position: absolute;
-  top: 50%;
-  right: 9px;
-  color: var(--muted-2);
-  font-family: var(--font-mono);
-  font-size: 8.5px;
-  pointer-events: none;
-  transform: translateY(-50%);
-}
-
-.editor-number input::-webkit-outer-spin-button,
-.editor-number input::-webkit-inner-spin-button {
-  margin: 0;
-  -webkit-appearance: none;
-}
-
-.editor-number input {
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-.editor-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
 .editor-field__hint,
 .editor-field__error {
   margin: 0;

@@ -1,0 +1,116 @@
+.range-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.range-field__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.range-field__head label {
+  color: var(--text-soft);
+  font-size: 10px;
+  font-weight: 560;
+  letter-spacing: 0.02em;
+}
+
+.range-field__number {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.range-field__input {
+  width: 68px;
+  padding: 4px 24px 4px 7px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(8, 16, 31, 0.62);
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: right;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.range-field__input:focus {
+  outline: none;
+  border-color: rgba(126, 190, 255, 0.34);
+  box-shadow: 0 0 0 3px rgba(94, 151, 255, 0.08);
+}
+
+.range-field__input.is-invalid {
+  border-color: rgba(226, 138, 148, 0.42);
+  background: rgba(94, 33, 46, 0.18);
+}
+
+.range-field__input::placeholder {
+  color: var(--muted-2);
+}
+
+.range-field__number input::-webkit-outer-spin-button,
+.range-field__number input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.range-field__number input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.range-field__suffix {
+  position: absolute;
+  right: 7px;
+  color: var(--muted-2);
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  pointer-events: none;
+}
+
+.range-field__slider {
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  accent-color: var(--tone, #7eaeff);
+  cursor: pointer;
+}
+
+.range-field__slider:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--tone, #7eaeff) 55%, transparent);
+  outline-offset: 1px;
+  border-radius: 999px;
+}
+
+.range-field.is-pending .range-field__slider {
+  opacity: 0.5;
+}
+
+.range-field__scale {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -3px;
+  color: var(--muted-2);
+  font-family: var(--font-mono);
+  font-size: 8px;
+}
+
+.range-field__message {
+  margin: 0;
+  color: var(--muted-2);
+  font-size: 8.5px;
+  line-height: 1.45;
+}
+
+.range-field__message.is-error {
+  color: #e6a0a8;
+}

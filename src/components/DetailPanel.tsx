@@ -6,6 +6,7 @@ import type {
   KnowledgePointEditableFields,
 } from '../types/knowledge';
 import { getMasteryLabel } from '../utils/star';
+import { RangeNumberField } from './inputs/RangeNumberField';
 import { StarGlyph } from './StarGlyph';
 import './DetailPanel.css';
 
@@ -202,92 +203,41 @@ function NodeEditorForm({
         </p>
       </div>
 
-      <div className="editor-grid">
-        <div className="editor-field">
-          <label htmlFor="editor-score">分值占比</label>
-          <div className="editor-number">
-            <input
-              id="editor-score"
-              className={`editor-input ${errors.scoreShare ? 'is-invalid' : ''}`}
-              type="number"
-              min={1}
-              max={100}
-              step={1}
-              inputMode="numeric"
-              placeholder="待设置"
-              value={draft.scoreShare}
-              onChange={(event) => onChange('scoreShare', event.target.value)}
-              aria-invalid={Boolean(errors.scoreShare)}
-              aria-describedby={errors.scoreShare ? 'editor-score-message' : undefined}
-            />
-            <span aria-hidden="true">%</span>
-          </div>
-          <p
-            id="editor-score-message"
-            className={errors.scoreShare ? 'editor-field__error' : 'editor-field__hint'}
-          >
-            {errors.scoreShare ?? '1–100，留空保持待设置'}
-          </p>
-        </div>
+      <RangeNumberField
+        id="editor-score"
+        label="分值占比"
+        value={draft.scoreShare}
+        min={1}
+        max={100}
+        suffix="%"
+        hint="1–100，留空保持待设置；超过 12% 星体尺寸不再增大"
+        error={errors.scoreShare}
+        onChange={(value) => onChange('scoreShare', value)}
+      />
 
-        <div className="editor-field">
-          <label htmlFor="editor-minutes">预计用时</label>
-          <div className="editor-number">
-            <input
-              id="editor-minutes"
-              className={`editor-input ${errors.estimatedMinutes ? 'is-invalid' : ''}`}
-              type="number"
-              min={1}
-              max={600}
-              step={1}
-              inputMode="numeric"
-              placeholder="待设置"
-              value={draft.estimatedMinutes}
-              onChange={(event) => onChange('estimatedMinutes', event.target.value)}
-              aria-invalid={Boolean(errors.estimatedMinutes)}
-              aria-describedby={
-                errors.estimatedMinutes ? 'editor-minutes-message' : undefined
-              }
-            />
-            <span aria-hidden="true">min</span>
-          </div>
-          <p
-            id="editor-minutes-message"
-            className={
-              errors.estimatedMinutes ? 'editor-field__error' : 'editor-field__hint'
-            }
-          >
-            {errors.estimatedMinutes ?? '1–600，留空保持待设置'}
-          </p>
-        </div>
-      </div>
+      <RangeNumberField
+        id="editor-minutes"
+        label="预计用时"
+        value={draft.estimatedMinutes}
+        min={1}
+        max={600}
+        suffix="min"
+        hint="1–600，留空保持待设置"
+        error={errors.estimatedMinutes}
+        onChange={(value) => onChange('estimatedMinutes', value)}
+      />
 
-      <div className="editor-field">
-        <label htmlFor="editor-mastery">掌握度</label>
-        <div className="editor-number">
-          <input
-            id="editor-mastery"
-            className={`editor-input ${errors.mastery ? 'is-invalid' : ''}`}
-            type="number"
-            min={0}
-            max={100}
-            step={1}
-            inputMode="numeric"
-            placeholder="待设置"
-            value={draft.mastery}
-            onChange={(event) => onChange('mastery', event.target.value)}
-            aria-invalid={Boolean(errors.mastery)}
-            aria-describedby={errors.mastery ? 'editor-mastery-message' : undefined}
-          />
-          <span aria-hidden="true">%</span>
-        </div>
-        <p
-          id="editor-mastery-message"
-          className={errors.mastery ? 'editor-field__error' : 'editor-field__hint'}
-        >
-          {errors.mastery ?? '0–100，影响星体亮度；留空保持待设置'}
-        </p>
-      </div>
+      <RangeNumberField
+        id="editor-mastery"
+        label="掌握度"
+        value={draft.mastery}
+        min={0}
+        max={100}
+        suffix="%"
+        hint="0–100，影响星体亮度；留空保持待设置"
+        error={errors.mastery}
+        onChange={(value) => onChange('mastery', value)}
+      />
 
       <p className="editor-persist-note">
         <Info size={12} strokeWidth={1.9} aria-hidden="true" />

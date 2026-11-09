@@ -17,7 +17,7 @@
 - 载入示例笔记、恢复初始布局
 - 桌面与移动端响应式布局
 
-尚未实现、且界面上已明确标注为后续阶段的功能：Markdown/TXT 笔记解析、节点编辑、0-1 背包航线规划、学习记录、AI 能力。
+尚未实现、且界面上已明确标注为后续阶段的功能：Markdown/TXT 笔记导入界面（解析器核心已在 Task 2.1 完成）、节点编辑、0-1 背包航线规划、学习记录、AI 能力。
 
 ## 技术栈
 
@@ -26,6 +26,7 @@
 - Lucide React
 - 原生 CSS / CSS Variables
 - LocalStorage
+- Vitest（单元测试）
 
 ## 本地运行
 
@@ -42,6 +43,7 @@ npm run dev
 npm run build      # TypeScript 类型检查 + 生产构建
 npm run preview    # 预览生产构建
 npm run typecheck  # 仅执行类型检查
+npm test           # 运行 Vitest 单元测试
 ```
 
 ## 目录结构
@@ -64,10 +66,14 @@ star-map-backpack/
 │  │  └─ Toast.tsx             轻量操作反馈
 │  ├─ data/
 │  │  └─ sampleCourse.ts       示例课程、章节与知识点
+│  ├─ parsers/
+│  │  ├─ noteParser.ts         Markdown/TXT 解析器核心函数
+│  │  └─ noteParser.test.ts    解析器单元测试
 │  ├─ styles/
 │  │  └─ base.css              设计令牌、基础样式
 │  ├─ types/
-│  │  └─ knowledge.ts          知识点与图节点类型
+│  │  ├─ knowledge.ts          知识点与图节点类型
+│  │  └─ parsedNote.ts         解析草稿类型
 │  ├─ utils/
 │  │  ├─ knowledgeGraph.ts     数据转 React Flow 节点与边
 │  │  ├─ star.ts               星体尺寸、亮度、格式化工具

@@ -21,6 +21,7 @@
 - `docs/DESIGN.md` 已由 Task 2.0 创建，记录颜色、字体、间距、圆角、阴影与动效基线。
 - 当前示例课程为“数据结构与算法”；Task 2.4 要求加入“计算机组成原理”示例，现有 `src/data/sampleCourse.ts` 已存在，执行前必须处理并存/替换冲突。
 - 当前不包含账号、后端、云数据库、AI、背包算法或真实笔记解析。
+- 2026-11-09 更新：Task 2.1 已接入 Vitest 与 `npm test`，新增 Markdown/TXT 解析器核心与测试；尚未接入导入 UI。
 
 ## 2. 产品边界与文案红线
 
@@ -130,6 +131,7 @@ Task 2.0 复核说明：
 | 2026-11-08 | 改 | Task 2.0、B-07、B-09–B-11 | Task 2.0 完成 UI 与设计 token 审查；复核 Backlog，调整 B-07 目标 Sprint，新增 3 条现状问题 | 新增 `docs/DESIGN.md`；Backlog 由 8 条增至 11 条；未修改业务代码 |
 | 2026-11-08 | 改 | Task 2.0 | 用户确认 B-01–B-11；Task 2.0 由“待验收”改为“已完成” | B-01–B-07、B-09–B-11 标记“已排期”；B-08 仍需在 Task 2.4 前决策 |
 | 2026-11-08 | 改 | B-08、Task 2.4 | 用户选择 B-08“并存”方案 | 保留现有数据结构示例，新增计算机组成原理数据包与注册表；B-08 标记“已排期（并存）” |
+| 2026-11-09 | 改 | Task 2.1 | 解析器核心、Vitest 与 `npm test` 完成，任务状态改为已完成 | 新增 `src/parsers/`、`src/types/parsedNote.ts`；未修改 UI 与示例数据 |
 
 ## 9. Sprint 2 至 Sprint 7 任务卡
 
@@ -163,7 +165,7 @@ Task 2.0 复核说明：
 #### Task 2.1 Markdown/TXT 解析器核心函数
 
 - **任务 ID**：Task 2.1
-- **当前状态**：待办
+- **当前状态**：已完成
 - **前置条件**：Task 2.0 完成
 - **目标**：实现纯 TypeScript 解析器，输入文本输出结构化知识点草稿。
 - **具体改动**：
@@ -171,15 +173,16 @@ Task 2.0 复核说明：
   - 新增 `src/types/parsedNote.ts`。
   - 当前 `package.json` 没有测试脚本；本任务接入与 Vite 兼容的测试框架（默认 Vitest），补充 `npm test` 脚本并记录在 README 或任务完成说明中。
 - **验收标准**：
-  - [ ] 支持标题层级、列表、段落。
-  - [ ] 输出 `{ title, content, level, parentTitle }[]`。
-  - [ ] 有单元测试，覆盖空文本、无标题段落、多级标题和列表。
-  - [ ] `npm run build` 成功。
+  - [x] 支持标题层级、列表、段落。
+  - [x] 输出 `{ title, content, level, parentTitle }[]`。
+  - [x] 有单元测试，覆盖空文本、无标题段落、多级标题和列表。
+  - [x] `npm run build` 成功。
 - **DoD 补充**：解析器为纯 TS，不依赖 React；不生成分值、掌握度或时间估算；空文本等可预期输入返回结构化结果而不是崩溃。
 - **UI 确认点**：不涉及。
 - **演示方法**：展示一段 Markdown 的测试输入与解析结果。
 - **禁止事项**：不接 UI；不生成分值/掌握度。
 - **修复记录**：（留空）
+- **完成说明**：2026-11-09 新增 `src/parsers/noteParser.ts`、`src/types/parsedNote.ts` 与 6 项 Vitest 用例；`npm test` 6/6 通过，`npm run build` 成功；未接 UI，未生成分值、掌握度或时间。
 
 #### Task 2.2 解析结果到知识点的映射与关联生成
 

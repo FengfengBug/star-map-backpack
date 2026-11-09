@@ -2,7 +2,7 @@
 
 把课程笔记转化为可交互的知识星图，通过 0-1 背包算法，在有限复习时间内筛选最值得复习的知识点，并生成可视化复习航线。
 
-当前仓库已完成 **第一阶段：项目初始化与核心界面**、**Sprint 2：Markdown/TXT 笔记导入与示例课程**、**Sprint 3 的节点编辑面板与参数控件（Task 3.1、Task 3.2）**，以及 **Sprint 4 的 0-1 背包纯函数（Task 4.1）**。项目不包含账号、后端、云数据库或 AI；背包算法尚未接入界面。
+当前仓库已完成 **第一阶段：项目初始化与核心界面**、**Sprint 2：Markdown/TXT 笔记导入与示例课程**、**Sprint 3 的节点编辑面板与参数控件（Task 3.1、Task 3.2）**，以及 **Sprint 4 的 0-1 背包纯函数与可解释输出（Task 4.1、Task 4.2）**。项目不包含账号、后端、云数据库或 AI；背包算法尚未接入界面。
 
 ## 当前已实现
 
@@ -24,6 +24,7 @@
 - 空内容、非法格式、超限文件与解析失败均有明确提示
 - 示例数据统一标注“示例数据，参数可编辑”
 - 纯 TypeScript 0-1 背包算法：按分钟预算选择复习节点，收益 = 分值占比 ×（100 − 掌握度），输出选中/放弃与总收益、总用时
+- 每个选中/放弃节点都有结构化理由（code + 参数）与可复现文案，覆盖选中、超预算、待设置、非法参数、掌握度已满与未入选
 - 桌面与移动端响应式布局
 
 尚未实现、且界面上已明确标注为后续阶段的功能：0-1 背包算法的界面联动与复习航线、学习记录、AI 能力。导入的知识点分值占比、掌握度与预计用时保持“待设置”，可在右侧详情面板点击“编辑”补充；导入结果仅保存在本次会话，刷新后恢复默认示例课程。
@@ -83,8 +84,8 @@ star-map-backpack/
 │  │  ├─ sampleCourses.ts      示例课程注册表与查询
 │  │  └─ sampleCourses.test.ts 示例课程完整性测试
 │  ├─ algorithms/
-│  │  ├─ knapsack.ts           0-1 背包纯函数：分钟预算、收益计算与确定性取舍
-│  │  └─ knapsack.test.ts      算法边界、最优性与纯函数测试
+│  │  ├─ knapsack.ts           0-1 背包纯函数：预算、收益、取舍与理由生成
+│  │  └─ knapsack.test.ts      算法边界、最优性、理由与纯函数测试
 │  ├─ parsers/
 │  │  ├─ noteParser.ts         Markdown/TXT 解析器核心函数
 │  │  ├─ noteParser.test.ts    解析器单元测试
@@ -183,14 +184,17 @@ star-map-backpack/
 - 收益：`scoreShare × (100 − mastery)`；掌握度越高，剩余可提升空间越小。
 - 参数处理：分值/用时/掌握度任一为“待设置”或非法（分值 ≤ 0、用时非正整数、掌握度超出 0–100）的节点不参与选择，计入 `skippedIds`。
 - 取舍：收益并列时优先保留输入顺序靠前的节点，结果可复现。
-- 输出：`selectedIds`、`skippedIds`、`totalBenefit`、`totalMinutes`。
+- 输出：`selectedIds`、`skippedIds`、`totalBenefit`、`totalMinutes`，以及按输入顺序排列的 `decisions`。
+- 理由：每个 decision 含 `reason.code`、`reason.params` 与可展示 `message`；`describeReason(reason)` 可由结构化参数复现文案。
+- 理由代码：`selected-in-route`（选中）、`skipped-over-budget`（超出预算）、`skipped-no-mastery-gap`（掌握度已满）、`skipped-pending-parameters`（参数待设置）、`skipped-invalid-parameters`（参数非法）、`skipped-not-in-route`（未进入最优组合）。
+- 待设置与非法参数理由会列出具体字段与当前值；未入选理由会引用自身收益与选中组合总收益。
 - 当前未接入界面；算法测试随 `npm test` 运行。
 
 ## 后续路线
 
 1. Sprint 2：Markdown/TXT 解析、知识点映射、笔记导入与计算机组成原理示例课程（已完成）
 2. Sprint 3：节点编辑面板、分值与掌握度更新（Task 3.1、Task 3.2 已完成）
-3. Sprint 4：`src/algorithms/` 独立 0-1 背包算法与测试（Task 4.1 已完成；Task 4.2、Task 4.3 待办）
+3. Sprint 4：`src/algorithms/` 独立 0-1 背包算法与测试（Task 4.1、Task 4.2 已完成；Task 4.3 待办）
 4. Sprint 5：算法与星图联动、航线动画、时间滑块
 5. Sprint 6：学习记录、状态更新、分享海报
 6. Sprint 7：AI 接口、异常处理与最终 UI 打磨

@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { BookOpen, Check, FileText, RefreshCw, Upload } from 'lucide-react';
+import type { SampleCourseId } from '../data/sampleCourses';
 import type { ImportedCourse } from '../parsers/importedNote';
 import type { ChapterDefinition, KnowledgeFlowNode } from '../types/knowledge';
 import type { NoteSourceSummary } from '../types/noteSource';
@@ -16,6 +17,7 @@ interface SidebarProps {
   activeCourseId: string | null;
   onSelectNode: (nodeId: string) => void;
   onLoadSample: () => void;
+  onLoadCourse: (courseId: SampleCourseId) => void;
   noteSource: NoteSourceSummary;
   onImportConfirm: (course: ImportedCourse) => void;
 }
@@ -27,6 +29,7 @@ export function Sidebar({
   activeCourseId,
   onSelectNode,
   onLoadSample,
+  onLoadCourse,
   noteSource,
   onImportConfirm,
 }: SidebarProps) {
@@ -34,6 +37,14 @@ export function Sidebar({
   const [isSamplePickerOpen, setIsSamplePickerOpen] = useState(false);
 
   const closeSamplePicker = useCallback(() => setIsSamplePickerOpen(false), []);
+
+  const handleSampleConfirm = useCallback(
+    (courseId: SampleCourseId) => {
+      setIsSamplePickerOpen(false);
+      onLoadCourse(courseId);
+    },
+    [onLoadCourse],
+  );
 
   const closeImportPreview = useCallback(() => setIsImportPreviewOpen(false), []);
   const handleImportConfirm = useCallback(
@@ -214,6 +225,7 @@ export function Sidebar({
       <SampleCoursePicker
         activeCourseId={activeCourseId}
         onClose={closeSamplePicker}
+        onConfirm={handleSampleConfirm}
       />
     )}
     </>

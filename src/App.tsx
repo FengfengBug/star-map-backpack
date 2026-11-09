@@ -19,7 +19,12 @@ import {
   sampleKnowledgePoints,
   sampleNote,
 } from './data/sampleCourse';
-import { defaultSampleCourseId } from './data/sampleCourses';
+import {
+  defaultSampleCourseId,
+  getSampleCoursePackage,
+  type SampleCourseId,
+  type SampleCoursePackage,
+} from './data/sampleCourses';
 import type { ImportedCourse } from './parsers/importedNote';
 import type {
   ChapterDefinition,
@@ -66,6 +71,9 @@ function StarMapWorkspace() {
   const [courseChapters, setCourseChapters] = useState<ChapterDefinition[]>(chapters);
   const [courseTitle, setCourseTitle] = useState(sampleCourse.title);
   const [noteSource, setNoteSource] = useState<NoteSourceSummary>(SAMPLE_NOTE_SOURCE);
+  const [activeSampleCourseId, setActiveSampleCourseId] = useState<SampleCourseId | null>(
+    defaultSampleCourseId,
+  );
   const [initialNodes] = useState(() =>
     withSelection(
       createKnowledgeNodes(sampleKnowledgePoints, loadNodePositions()),
@@ -118,19 +126,52 @@ function StarMapWorkspace() {
     });
   }, [fitView]);
 
+  const loadSampleCourse = useCallback(
+    (coursePackage: SampleCoursePackage) => {
+      clearNodePositions();
+      setCoursePoints(coursePackage.points);
+      setCourseChapters(coursePackage.chapters);
+      setCourseTitle(coursePackage.course.title);
+      setNoteSource({
+        fileName: coursePackage.note.fileName,
+        subtitle: coursePackage.course.subtitle,
+        excerpt: coursePackage.note.excerpt,
+        characterCount: coursePackage.note.characterCount,
+        kind: 'sample',
+      });
+      setActiveSampleCourseId(coursePackage.id);
+
+      const defaultSelection = coursePackage.points.some(
+        (point) => point.id === INITIAL_SELECTED_NODE_ID,
+      )
+        ? INITIAL_SELECTED_NODE_ID
+        : (coursePackage.points[0]?.id ?? null);
+
+      setSelectedNodeId(defaultSelection);
+      setNodes(
+        withSelection(createKnowledgeNodes(coursePackage.points), defaultSelection),
+      );
+      notify(`已载入「${coursePackage.course.title}」示例课程，可拖动星体调整布局`);
+      fitMapToCanvas();
+    },
+    [fitMapToCanvas, notify, setNodes],
+  );
+
   const handleLoadSample = useCallback(() => {
-    clearNodePositions();
-    setCoursePoints(sampleKnowledgePoints);
-    setCourseChapters(chapters);
-    setCourseTitle(sampleCourse.title);
-    setNoteSource(SAMPLE_NOTE_SOURCE);
-    setNodes(
-      withSelection(createKnowledgeNodes(sampleKnowledgePoints), INITIAL_SELECTED_NODE_ID),
-    );
-    setSelectedNodeId(INITIAL_SELECTED_NODE_ID);
-    notify('示例笔记已载入，可拖动星体调整布局');
-    fitMapToCanvas();
-  }, [fitMapToCanvas, notify, setNodes]);
+    const coursePackage =
+      getSampleCoursePackage(activeSampleCourseId) ??
+      getSampleCoursePackage(defaultSampleCourseId);
+
+    if (coursePackage) loadSampleCourse(coursePackage);
+  }, [activeSampleCourseId, loadSampleCourse]);
+
+  const handleLoadCourse = useCallback(
+    (courseId: SampleCourseId) => {
+      const coursePackage = getSampleCoursePackage(courseId);
+      if (coursePackage) loadSampleCourse(coursePackage);
+    },
+    [loadSampleCourse],
+  );
 
   const handleResetLayout = useCallback(() => {
     setNodes(
@@ -154,6 +195,7 @@ function StarMapWorkspace() {
         characterCount: course.summary.characterCount,
         kind: 'imported',
       });
+      setActiveSampleCourseId(null);
       setSelectedNodeId(null);
       setNodes(withSelection(createKnowledgeNodes(course.points), null));
       notify(`已导入 ${course.points.length} 个知识点，分值占比等参数待设置`);
@@ -220,9 +262,10 @@ function StarMapWorkspace() {
           chapters={courseChapters}
           nodes={nodes}
           selectedNodeId={selectedNodeId}
-          activeCourseId={noteSource.kind === 'sample' ? defaultSampleCourseId : null}
+          activeCourseId={activeSampleCourseId}
           onSelectNode={handleSelectNode}
           onLoadSample={handleLoadSample}
+          onLoadCourse={handleLoadCourse}
           noteSource={noteSource}
           onImportConfirm={handleImportConfirm}
         />

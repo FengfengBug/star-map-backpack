@@ -12,7 +12,7 @@ import './SampleCoursePicker.css';
 interface SampleCoursePickerProps {
   activeCourseId: string | null;
   onClose: () => void;
-  onConfirm?: (courseId: SampleCourseId) => void;
+  onConfirm: (courseId: SampleCourseId) => void;
 }
 
 function getCourseStats(coursePackage: SampleCoursePackage) {
@@ -44,8 +44,7 @@ export function SampleCoursePicker({
         ?.id as SampleCourseId | undefined) ?? defaultSampleCourseId,
   );
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const isPreviewOnly = !onConfirm;
-  const canConfirm = Boolean(onConfirm) && selectedId !== activeCourseId;
+  const canConfirm = selectedId !== activeCourseId;
 
   useEffect(() => {
     const previouslyFocused =
@@ -177,11 +176,9 @@ export function SampleCoursePicker({
 
         <footer className="sample-modal__footer">
           <p className="sample-footer-note">
-            {isPreviewOnly
-              ? '静态预览：确认后接入课程切换。'
-              : selectedId === activeCourseId
-                ? '当前课程已载入，可选择另一门示例课程。'
-                : '确认后替换当前星图，选中状态与已保存布局会被清空。'}
+            {selectedId === activeCourseId
+              ? '当前课程已载入，可选择另一门示例课程。'
+              : '确认后替换当前星图，选中状态与已保存布局会被清空。'}
           </p>
           <div className="sample-actions">
             <button type="button" className="sample-button sample-button--quiet" onClick={onClose}>
@@ -191,10 +188,7 @@ export function SampleCoursePicker({
               type="button"
               className="sample-button sample-button--primary"
               disabled={!canConfirm}
-              title={isPreviewOnly ? '静态预览：确认后接入课程切换' : undefined}
-              onClick={() => {
-                if (onConfirm) onConfirm(selectedId);
-              }}
+              onClick={() => onConfirm(selectedId)}
             >
               载入并替换当前星图
               <ArrowRight size={14} strokeWidth={2} aria-hidden="true" />

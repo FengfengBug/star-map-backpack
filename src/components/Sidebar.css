@@ -97,6 +97,17 @@
   -webkit-line-clamp: 2;
 }
 
+.note-file__notice {
+  margin: 0 0 10px;
+  padding: 7px 8px;
+  border: 1px solid rgba(242, 200, 109, 0.12);
+  border-radius: 7px;
+  background: rgba(242, 200, 109, 0.03);
+  color: var(--muted-2);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
 .note-file__footer {
   display: flex;
   align-items: center;

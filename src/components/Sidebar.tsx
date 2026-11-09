@@ -1,10 +1,11 @@
 import { useCallback, useState } from 'react';
-import { Check, FileText, RefreshCw, Sparkles, Upload } from 'lucide-react';
+import { BookOpen, Check, FileText, RefreshCw, Upload } from 'lucide-react';
 import type { ImportedCourse } from '../parsers/importedNote';
 import type { ChapterDefinition, KnowledgeFlowNode } from '../types/knowledge';
 import type { NoteSourceSummary } from '../types/noteSource';
 import { formatMastery, formatScoreShare } from '../utils/star';
 import { NoteImportPreview } from './NoteImportPreview';
+import { SampleCoursePicker } from './SampleCoursePicker';
 import { StarGlyph } from './StarGlyph';
 import './Sidebar.css';
 
@@ -12,6 +13,7 @@ interface SidebarProps {
   chapters: ChapterDefinition[];
   nodes: KnowledgeFlowNode[];
   selectedNodeId: string | null;
+  activeCourseId: string | null;
   onSelectNode: (nodeId: string) => void;
   onLoadSample: () => void;
   noteSource: NoteSourceSummary;
@@ -22,12 +24,16 @@ export function Sidebar({
   chapters,
   nodes,
   selectedNodeId,
+  activeCourseId,
   onSelectNode,
   onLoadSample,
   noteSource,
   onImportConfirm,
 }: SidebarProps) {
   const [isImportPreviewOpen, setIsImportPreviewOpen] = useState(false);
+  const [isSamplePickerOpen, setIsSamplePickerOpen] = useState(false);
+
+  const closeSamplePicker = useCallback(() => setIsSamplePickerOpen(false), []);
 
   const closeImportPreview = useCallback(() => setIsImportPreviewOpen(false), []);
   const handleImportConfirm = useCallback(
@@ -51,8 +57,8 @@ export function Sidebar({
             type="button"
             className="icon-button"
             onClick={onLoadSample}
-            title="重新载入示例笔记"
-            aria-label="重新载入示例笔记"
+            title="重新载入当前示例课程"
+            aria-label="重新载入当前示例课程"
           >
             <RefreshCw size={14} strokeWidth={1.9} />
           </button>
@@ -76,6 +82,11 @@ export function Sidebar({
             </span>
           </div>
           <p className="note-file__excerpt">{noteSource.excerpt}</p>
+          {noteSource.kind === 'sample' && (
+            <p className="note-file__notice">
+              示例数据，参数可编辑 · 编辑能力将在 Sprint 3 开放
+            </p>
+          )}
           <div className="note-file__footer">
             <span className="note-file__loaded">
               <Check size={11} strokeWidth={2.5} aria-hidden="true" />
@@ -89,9 +100,16 @@ export function Sidebar({
         </div>
 
         <div className="note-actions">
-          <button type="button" className="button button--primary" onClick={onLoadSample}>
-            <Sparkles size={15} strokeWidth={1.9} aria-hidden="true" />
-            载入示例笔记
+          <button
+            type="button"
+            className="button button--primary"
+            onClick={() => setIsSamplePickerOpen(true)}
+            aria-haspopup="dialog"
+            title="选择并载入示例课程"
+          >
+            <BookOpen size={15} strokeWidth={1.9} aria-hidden="true" />
+            载入示例课程
+            <span className="button__badge">2 套</span>
           </button>
           <button
             type="button"
@@ -189,6 +207,13 @@ export function Sidebar({
         currentNodeCount={nodes.length}
         onClose={closeImportPreview}
         onConfirm={handleImportConfirm}
+      />
+    )}
+
+    {isSamplePickerOpen && (
+      <SampleCoursePicker
+        activeCourseId={activeCourseId}
+        onClose={closeSamplePicker}
       />
     )}
     </>

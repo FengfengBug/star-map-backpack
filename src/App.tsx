@@ -19,6 +19,7 @@ import {
   sampleKnowledgePoints,
   sampleNote,
 } from './data/sampleCourse';
+import { defaultSampleCourseId } from './data/sampleCourses';
 import type { ImportedCourse } from './parsers/importedNote';
 import type {
   ChapterDefinition,
@@ -219,6 +220,7 @@ function StarMapWorkspace() {
           chapters={courseChapters}
           nodes={nodes}
           selectedNodeId={selectedNodeId}
+          activeCourseId={noteSource.kind === 'sample' ? defaultSampleCourseId : null}
           onSelectNode={handleSelectNode}
           onLoadSample={handleLoadSample}
           noteSource={noteSource}

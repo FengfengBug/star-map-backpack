@@ -29,7 +29,7 @@ import {
 import type { ImportedCourse } from './parsers/importedNote';
 import type {
   ChapterDefinition,
-  KnowledgeFlowEdge,
+  GraphFlowEdge,
   KnowledgeFlowNode,
   KnowledgePoint,
   KnowledgePointEditableFields,
@@ -42,6 +42,7 @@ import {
   createKnowledgeNodes,
 } from './utils/knowledgeGraph';
 import {
+  createReviewRouteEdges,
   createReviewRouteItems,
   createRouteStateMap,
 } from './utils/reviewRoute';
@@ -155,9 +156,13 @@ function StarMapWorkspace() {
   const [plannedBudgetMinutes, setPlannedBudgetMinutes] = useState(
     sampleCourse.reviewWindowMinutes,
   );
+  const [routeAnimationEnabled, setRouteAnimationEnabled] = useState(
+    () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
+  const [routeAnimationRun, setRouteAnimationRun] = useState(0);
   const [toast, setToast] = useState<ToastState | null>(null);
   const toastCounter = useRef(0);
-  const { fitView, getNodes } = useReactFlow<KnowledgeFlowNode, KnowledgeFlowEdge>();
+  const { fitView, getNodes } = useReactFlow<KnowledgeFlowNode, GraphFlowEdge>();
 
   const notify = useCallback((message: string) => {
     toastCounter.current += 1;
@@ -189,14 +194,15 @@ function StarMapWorkspace() {
     return () => window.clearTimeout(timer);
   }, [budgetMinutes, plannedBudgetMinutes]);
 
+  const routePlan = useMemo(
+    () => planReviewRoute(createReviewRouteItems(coursePoints), plannedBudgetMinutes),
+    [coursePoints, plannedBudgetMinutes],
+  );
+  const routeStates = useMemo(() => createRouteStateMap(routePlan), [routePlan]);
+
   useEffect(() => {
-    setNodes((currentNodes) =>
-      applyRouteStates(
-        currentNodes,
-        createRouteStates(coursePoints, plannedBudgetMinutes),
-      ),
-    );
-  }, [coursePoints, plannedBudgetMinutes, setNodes]);
+    setNodes((currentNodes) => applyRouteStates(currentNodes, routeStates));
+  }, [routeStates, setNodes]);
 
   const handleSelectNode = useCallback(
     (nodeId: string | null) => {
@@ -407,10 +413,20 @@ function StarMapWorkspace() {
     [getNodes],
   );
 
-  // 编辑预览只更新 nodes，不重建边；边仅依赖课程数据与选中态。
+  const handleGenerateRoute = useCallback(() => {
+    setRouteAnimationRun((run) => run + 1);
+  }, []);
+
+  // 编辑预览只更新 nodes，不重建边；边仅依赖课程数据、选中态与航线动画。
   const edges = useMemo(
-    () => createKnowledgeEdges(createKnowledgeNodes(coursePoints), selectedNodeId),
-    [coursePoints, selectedNodeId],
+    () => [
+      ...createKnowledgeEdges(createKnowledgeNodes(coursePoints), selectedNodeId),
+      ...createReviewRouteEdges(routePlan.selectedIds, {
+        animated: routeAnimationEnabled,
+        animationRun: routeAnimationRun,
+      }),
+    ],
+    [coursePoints, routeAnimationEnabled, routeAnimationRun, routePlan, selectedNodeId],
   );
 
   const selectedNode = selectedNodeId
@@ -471,6 +487,10 @@ function StarMapWorkspace() {
           nodes={nodes}
           budgetMinutes={budgetMinutes}
           onBudgetChange={setBudgetMinutes}
+          animationEnabled={routeAnimationEnabled}
+          onAnimationChange={setRouteAnimationEnabled}
+          onGenerateRoute={handleGenerateRoute}
+          routeNodeCount={routePlan.selectedIds.length}
         />
       </main>
 

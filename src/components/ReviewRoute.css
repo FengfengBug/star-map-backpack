@@ -306,6 +306,66 @@
   font-weight: 400;
 }
 
+.route-animation {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  width: fit-content;
+  color: var(--muted);
+  font-size: 8.5px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  user-select: none;
+}
+
+.route-animation input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.route-animation__track {
+  position: relative;
+  width: 24px;
+  height: 13px;
+  border: 1px solid rgba(126, 174, 255, 0.22);
+  border-radius: 99px;
+  background: rgba(9, 17, 32, 0.72);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.route-animation__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--muted-2);
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease;
+}
+
+.route-animation input:checked + .route-animation__track {
+  border-color: rgba(232, 193, 116, 0.36);
+  background: rgba(232, 193, 116, 0.12);
+}
+
+.route-animation input:checked + .route-animation__track .route-animation__thumb {
+  background: #e8c174;
+  transform: translateX(13px);
+}
+
+.route-animation input:focus-visible + .route-animation__track {
+  outline: 2px solid rgba(126, 174, 255, 0.55);
+  outline-offset: 2px;
+}
+
 .route-action {
   display: flex;
   align-items: center;
@@ -321,9 +381,23 @@
   letter-spacing: 0.02em;
 }
 
+.route-action:not(:disabled) {
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.route-action:not(:disabled):hover {
+  border-color: rgba(232, 193, 116, 0.28);
+  background: rgba(232, 193, 116, 0.08);
+  color: var(--text-soft);
+}
+
 .route-action:disabled {
   cursor: not-allowed;
-  opacity: 0.78;
+  opacity: 0.58;
 }
 
 .route-action svg:last-child {
@@ -378,5 +452,13 @@
 
   .route-map__labels {
     font-size: 8.5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-animation__track,
+  .route-animation__thumb,
+  .route-action:not(:disabled) {
+    transition: none;
   }
 }

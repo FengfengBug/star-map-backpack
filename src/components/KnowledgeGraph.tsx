@@ -7,17 +7,18 @@ import {
   type OnNodesChange,
 } from '@xyflow/react';
 import { Move, RotateCcw } from 'lucide-react';
-import type { KnowledgeFlowEdge, KnowledgeFlowNode } from '../types/knowledge';
+import type { GraphFlowEdge, KnowledgeFlowNode } from '../types/knowledge';
 import { ConstellationEdge } from './ConstellationEdge';
+import { ReviewRouteEdge } from './ReviewRouteEdge';
 import { StarNode } from './StarNode';
 import './KnowledgeGraph.css';
 
 const nodeTypes = { knowledge: StarNode };
-const edgeTypes = { constellation: ConstellationEdge };
+const edgeTypes = { constellation: ConstellationEdge, reviewRoute: ReviewRouteEdge };
 
 interface KnowledgeGraphProps {
   nodes: KnowledgeFlowNode[];
-  edges: KnowledgeFlowEdge[];
+  edges: GraphFlowEdge[];
   onNodesChange: OnNodesChange<KnowledgeFlowNode>;
   onSelectNode: (nodeId: string | null) => void;
   onNodeDragStop: OnNodeDrag<KnowledgeFlowNode>;
@@ -32,6 +33,8 @@ export function KnowledgeGraph({
   onNodeDragStop,
   onResetLayout,
 }: KnowledgeGraphProps) {
+  const relationCount = edges.filter((edge) => edge.type === 'constellation').length;
+
   return (
     <section className="graph-panel panel" aria-labelledby="graph-heading">
       <header className="graph-header">
@@ -50,7 +53,7 @@ export function KnowledgeGraph({
           <span className="graph-count">
             <strong>{nodes.length}</strong> 颗星
             <span className="graph-count__divider" aria-hidden="true" />
-            <strong>{edges.length}</strong> 条关联
+            <strong>{relationCount}</strong> 条关联
           </span>
           <button
             type="button"
@@ -65,7 +68,7 @@ export function KnowledgeGraph({
       </header>
 
       <div className="graph-canvas">
-        <ReactFlow<KnowledgeFlowNode, KnowledgeFlowEdge>
+        <ReactFlow<KnowledgeFlowNode, GraphFlowEdge>
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}

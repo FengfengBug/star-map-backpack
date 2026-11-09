@@ -1,4 +1,4 @@
-import { Compass, Flag, Lock, Route } from 'lucide-react';
+import { Compass, Flag, Play, Route } from 'lucide-react';
 import type { KnowledgeFlowNode } from '../types/knowledge';
 import { formatDuration } from '../utils/star';
 import { sumPendingMinutes } from '../utils/knowledgeGraph';
@@ -12,12 +12,20 @@ interface ReviewRouteProps {
   nodes: KnowledgeFlowNode[];
   budgetMinutes: number;
   onBudgetChange: (minutes: number) => void;
+  animationEnabled: boolean;
+  onAnimationChange: (enabled: boolean) => void;
+  onGenerateRoute: () => void;
+  routeNodeCount: number;
 }
 
 export function ReviewRoute({
   nodes,
   budgetMinutes,
   onBudgetChange,
+  animationEnabled,
+  onAnimationChange,
+  onGenerateRoute,
+  routeNodeCount,
 }: ReviewRouteProps) {
   const pendingNodes = nodes.filter((node) => !node.data.reviewed);
   const pendingMinutes = sumPendingMinutes(nodes);
@@ -121,18 +129,40 @@ export function ReviewRoute({
             <strong>{formatDuration(budgetMinutes)}</strong>
           </div>
         </div>
+        <label className="route-animation">
+          <input
+            type="checkbox"
+            checked={animationEnabled}
+            onChange={(event) => onAnimationChange(event.target.checked)}
+          />
+          <span className="route-animation__track" aria-hidden="true">
+            <span className="route-animation__thumb" />
+          </span>
+          航线动画
+        </label>
         <button
           type="button"
           className="route-action"
-          disabled
-          title="航线路径动画将在后续任务接入"
+          onClick={onGenerateRoute}
+          disabled={routeNodeCount < 2}
+          title={
+            routeNodeCount < 2
+              ? '选中节点不足 2 个，暂不生成航线'
+              : animationEnabled
+                ? '按算法顺序播放航线绘制动画'
+                : '航线动画已关闭，点击完整显示航线'
+          }
         >
           <Route size={14} strokeWidth={1.8} aria-hidden="true" />
           生成复习航线
-          <Lock size={10} strokeWidth={2} aria-hidden="true" />
+          {animationEnabled && <Play size={10} strokeWidth={2} aria-hidden="true" />}
         </button>
         <p className="route-side__hint">
-          拖动滑块后按时间预算重算；航线路径动画将在后续任务接入
+          {routeNodeCount < 2
+            ? '航线需要至少两个选中知识点'
+            : animationEnabled
+              ? '点击按钮按算法顺序重播航线'
+              : '航线动画已关闭，航线完整显示'}
         </p>
       </div>
     </section>

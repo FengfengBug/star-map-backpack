@@ -65,4 +65,11 @@ export interface ConstellationEdgeData extends Record<string, unknown> {
   active: boolean;
 }
 
+export interface ReviewRouteEdgeData extends Record<string, unknown> {
+  animated: boolean;
+  delayMs: number;
+}
+
 export type KnowledgeFlowEdge = Edge<ConstellationEdgeData, 'constellation'>;
+export type ReviewRouteFlowEdge = Edge<ReviewRouteEdgeData, 'reviewRoute'>;
+export type GraphFlowEdge = KnowledgeFlowEdge | ReviewRouteFlowEdge;

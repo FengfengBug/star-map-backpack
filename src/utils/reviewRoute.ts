@@ -1,5 +1,12 @@
 import type { KnapsackItem, KnapsackResult } from '../algorithms/knapsack';
-import type { KnowledgePoint, ReviewRouteState } from '../types/knowledge';
+import type {
+  KnowledgePoint,
+  ReviewRouteFlowEdge,
+  ReviewRouteState,
+} from '../types/knowledge';
+
+export const ROUTE_SEGMENT_DURATION_MS = 520;
+const ROUTE_SEGMENT_GAP_MS = 40;
 
 export function createReviewRouteItems(points: KnowledgePoint[]): KnapsackItem[] {
   return points
@@ -10,6 +17,29 @@ export function createReviewRouteItems(points: KnowledgePoint[]): KnapsackItem[]
       mastery: point.mastery,
       estimatedMinutes: point.estimatedMinutes,
     }));
+}
+
+export function createReviewRouteEdges(
+  selectedIds: string[],
+  options: { animated: boolean; animationRun: number },
+): ReviewRouteFlowEdge[] {
+  return selectedIds.slice(1).map((targetId, index) => {
+    const sourceId = selectedIds[index];
+
+    return {
+      id: `review-route:${options.animationRun}:${sourceId}:${targetId}`,
+      source: sourceId,
+      target: targetId,
+      type: 'reviewRoute',
+      selectable: false,
+      focusable: false,
+      deletable: false,
+      data: {
+        animated: options.animated,
+        delayMs: index * (ROUTE_SEGMENT_DURATION_MS + ROUTE_SEGMENT_GAP_MS),
+      },
+    };
+  });
 }
 
 export function createRouteStateMap(

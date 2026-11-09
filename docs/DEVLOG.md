@@ -31,3 +31,9 @@
 简要说明：创建 `docs/DEVLOG.md` 与 `docs/screenshots/`，在 Roadmap 追加守则第 12 条；仅建立机制，截图记录由本次补录完成；提交 `c9dd17c`，当时推送失败后停止，本次补录随文档修改一并提交。
 
 ![](screenshots/2026-11-08-task-04-devlog-01.png)
+
+### 2026-11-09 · Task 2.1 Markdown/TXT 解析器核心
+
+简要说明：实现 Markdown/TXT 解析器核心与 Vitest 单元测试，支持标题层级、列表、段落和无标题正文，未接 UI、未生成分值或掌握度。
+
+![](screenshots/2026-11-09-task-21-note-parser-01.png)

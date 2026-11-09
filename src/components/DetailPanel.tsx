@@ -1,4 +1,5 @@
-import { ArrowUpRight, MapPin, X } from 'lucide-react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { ArrowUpRight, Check, Info, MapPin, Pencil, X } from 'lucide-react';
 import type { ChapterDefinition, KnowledgeFlowNode } from '../types/knowledge';
 import { getMasteryLabel } from '../utils/star';
 import { StarGlyph } from './StarGlyph';
@@ -36,6 +37,275 @@ function RelationRow({ label, node, onSelectNode }: RelationRowProps) {
   );
 }
 
+const EDITOR_TITLE_MAX = 60;
+const EDITOR_CONTENT_MAX = 500;
+
+interface EditorDraft {
+  title: string;
+  content: string;
+  scoreShare: string;
+  estimatedMinutes: string;
+  mastery: string;
+}
+
+type EditorErrors = Partial<Record<keyof EditorDraft, string>>;
+
+interface NodeEditorFormProps {
+  node: KnowledgeFlowNode;
+  chapter: ChapterDefinition | null;
+  draft: EditorDraft;
+  errors: EditorErrors;
+  notice: string | null;
+  onChange: (field: keyof EditorDraft, value: string) => void;
+  onCancel: () => void;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+}
+
+function createEditorDraft(node: KnowledgeFlowNode): EditorDraft {
+  return {
+    title: node.data.title,
+    content: node.data.content,
+    scoreShare: node.data.scoreShare === null ? '' : String(node.data.scoreShare),
+    estimatedMinutes:
+      node.data.estimatedMinutes === null ? '' : String(node.data.estimatedMinutes),
+    mastery: node.data.mastery === null ? '' : String(node.data.mastery),
+  };
+}
+
+function validateNumberField(
+  value: string,
+  min: number,
+  max: number,
+  label: string,
+) {
+  const trimmed = value.trim();
+  if (trimmed === '') return undefined;
+  if (!/^\d+$/.test(trimmed)) return `${label}需为整数`;
+  const parsed = Number(trimmed);
+  if (parsed < min || parsed > max) return `${label}需在 ${min}–${max} 之间`;
+  return undefined;
+}
+
+function validateEditorDraft(draft: EditorDraft): EditorErrors {
+  const errors: EditorErrors = {};
+
+  if (draft.title.trim() === '') {
+    errors.title = '标题不能为空';
+  } else if (draft.title.trim().length > EDITOR_TITLE_MAX) {
+    errors.title = `标题最多 ${EDITOR_TITLE_MAX} 个字符`;
+  }
+
+  if (draft.content.trim() === '') {
+    errors.content = '知识摘要不能为空';
+  } else if (draft.content.trim().length > EDITOR_CONTENT_MAX) {
+    errors.content = `知识摘要最多 ${EDITOR_CONTENT_MAX} 个字符`;
+  }
+
+  const scoreError = validateNumberField(draft.scoreShare, 1, 100, '分值占比');
+  if (scoreError) errors.scoreShare = scoreError;
+
+  const minutesError = validateNumberField(
+    draft.estimatedMinutes,
+    1,
+    600,
+    '预计用时',
+  );
+  if (minutesError) errors.estimatedMinutes = minutesError;
+
+  const masteryError = validateNumberField(draft.mastery, 0, 100, '掌握度');
+  if (masteryError) errors.mastery = masteryError;
+
+  return errors;
+}
+
+function NodeEditorForm({
+  node,
+  chapter,
+  draft,
+  errors,
+  notice,
+  onChange,
+  onCancel,
+  onSubmit,
+}: NodeEditorFormProps) {
+  const contentLength = draft.content.length;
+
+  return (
+    <form className="node-editor" onSubmit={onSubmit} noValidate>
+      <div className="editor-hero">
+        <span className="editor-hero__visual" aria-hidden="true">
+          <StarGlyph tone={node.data.tone} size={28} />
+        </span>
+        <div className="editor-hero__copy">
+          <span className="detail-chapter">{chapter?.label ?? '知识节点'}</span>
+          <p>保存后星体尺寸与亮度同步变化。</p>
+        </div>
+        <span className="editor-static-tag">静态预览</span>
+      </div>
+
+      <div className="editor-field">
+        <div className="editor-field__head">
+          <label htmlFor="editor-title">标题</label>
+          <span className={`editor-field__count ${errors.title ? 'is-error' : ''}`}>
+            {draft.title.length}/{EDITOR_TITLE_MAX}
+          </span>
+        </div>
+        <input
+          id="editor-title"
+          className={`editor-input ${errors.title ? 'is-invalid' : ''}`}
+          type="text"
+          value={draft.title}
+          maxLength={EDITOR_TITLE_MAX}
+          autoFocus
+          onChange={(event) => onChange('title', event.target.value)}
+          aria-invalid={Boolean(errors.title)}
+          aria-describedby={errors.title ? 'editor-title-message' : undefined}
+        />
+        <p
+          id="editor-title-message"
+          className={errors.title ? 'editor-field__error' : 'editor-field__hint'}
+        >
+          {errors.title ?? '必填，最多 60 个字符'}
+        </p>
+      </div>
+
+      <div className="editor-field">
+        <div className="editor-field__head">
+          <label htmlFor="editor-content">知识摘要</label>
+          <span className={`editor-field__count ${errors.content ? 'is-error' : ''}`}>
+            {contentLength}/{EDITOR_CONTENT_MAX}
+          </span>
+        </div>
+        <textarea
+          id="editor-content"
+          className={`editor-textarea ${errors.content ? 'is-invalid' : ''}`}
+          rows={4}
+          value={draft.content}
+          maxLength={EDITOR_CONTENT_MAX}
+          onChange={(event) => onChange('content', event.target.value)}
+          aria-invalid={Boolean(errors.content)}
+          aria-describedby={errors.content ? 'editor-content-message' : undefined}
+        />
+        <p
+          id="editor-content-message"
+          className={errors.content ? 'editor-field__error' : 'editor-field__hint'}
+        >
+          {errors.content ?? '必填，最多 500 个字符'}
+        </p>
+      </div>
+
+      <div className="editor-grid">
+        <div className="editor-field">
+          <label htmlFor="editor-score">分值占比</label>
+          <div className="editor-number">
+            <input
+              id="editor-score"
+              className={`editor-input ${errors.scoreShare ? 'is-invalid' : ''}`}
+              type="number"
+              min={1}
+              max={100}
+              step={1}
+              inputMode="numeric"
+              placeholder="待设置"
+              value={draft.scoreShare}
+              onChange={(event) => onChange('scoreShare', event.target.value)}
+              aria-invalid={Boolean(errors.scoreShare)}
+              aria-describedby={errors.scoreShare ? 'editor-score-message' : undefined}
+            />
+            <span aria-hidden="true">%</span>
+          </div>
+          <p
+            id="editor-score-message"
+            className={errors.scoreShare ? 'editor-field__error' : 'editor-field__hint'}
+          >
+            {errors.scoreShare ?? '1–100，留空保持待设置'}
+          </p>
+        </div>
+
+        <div className="editor-field">
+          <label htmlFor="editor-minutes">预计用时</label>
+          <div className="editor-number">
+            <input
+              id="editor-minutes"
+              className={`editor-input ${errors.estimatedMinutes ? 'is-invalid' : ''}`}
+              type="number"
+              min={1}
+              max={600}
+              step={1}
+              inputMode="numeric"
+              placeholder="待设置"
+              value={draft.estimatedMinutes}
+              onChange={(event) => onChange('estimatedMinutes', event.target.value)}
+              aria-invalid={Boolean(errors.estimatedMinutes)}
+              aria-describedby={
+                errors.estimatedMinutes ? 'editor-minutes-message' : undefined
+              }
+            />
+            <span aria-hidden="true">min</span>
+          </div>
+          <p
+            id="editor-minutes-message"
+            className={
+              errors.estimatedMinutes ? 'editor-field__error' : 'editor-field__hint'
+            }
+          >
+            {errors.estimatedMinutes ?? '1–600，留空保持待设置'}
+          </p>
+        </div>
+      </div>
+
+      <div className="editor-field">
+        <label htmlFor="editor-mastery">掌握度</label>
+        <div className="editor-number">
+          <input
+            id="editor-mastery"
+            className={`editor-input ${errors.mastery ? 'is-invalid' : ''}`}
+            type="number"
+            min={0}
+            max={100}
+            step={1}
+            inputMode="numeric"
+            placeholder="待设置"
+            value={draft.mastery}
+            onChange={(event) => onChange('mastery', event.target.value)}
+            aria-invalid={Boolean(errors.mastery)}
+            aria-describedby={errors.mastery ? 'editor-mastery-message' : undefined}
+          />
+          <span aria-hidden="true">%</span>
+        </div>
+        <p
+          id="editor-mastery-message"
+          className={errors.mastery ? 'editor-field__error' : 'editor-field__hint'}
+        >
+          {errors.mastery ?? '0–100，影响星体亮度；留空保持待设置'}
+        </p>
+      </div>
+
+      {notice && (
+        <p className="editor-notice" role="status">
+          <Check size={12} strokeWidth={2.2} aria-hidden="true" />
+          {notice}
+        </p>
+      )}
+
+      <p className="editor-static-note">
+        <Info size={12} strokeWidth={1.9} aria-hidden="true" />
+        当前为静态预览：只校验输入，不会写入星图或本地存储；确认后接入保存。
+      </p>
+
+      <div className="editor-actions">
+        <button type="button" className="button editor-cancel" onClick={onCancel}>
+          取消
+        </button>
+        <button type="submit" className="button button--primary editor-save">
+          <Check size={13} strokeWidth={2.2} aria-hidden="true" />
+          保存修改
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export function DetailPanel({
   node,
   chapter,
@@ -44,6 +314,54 @@ export function DetailPanel({
   onSelectNode,
   onClearSelection,
 }: DetailPanelProps) {
+  const [editorDraft, setEditorDraft] = useState<EditorDraft | null>(null);
+  const [editorErrors, setEditorErrors] = useState<EditorErrors>({});
+  const [editorNotice, setEditorNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    setEditorDraft(null);
+    setEditorErrors({});
+    setEditorNotice(null);
+  }, [node?.id]);
+
+  const isEditing = editorDraft !== null;
+
+  const handleStartEdit = () => {
+    if (!node) return;
+    setEditorDraft(createEditorDraft(node));
+    setEditorErrors({});
+    setEditorNotice(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditorDraft(null);
+    setEditorErrors({});
+    setEditorNotice(null);
+  };
+
+  const handleEditorChange = (field: keyof EditorDraft, value: string) => {
+    setEditorDraft((currentDraft) =>
+      currentDraft ? { ...currentDraft, [field]: value } : currentDraft,
+    );
+    setEditorErrors((currentErrors) => ({ ...currentErrors, [field]: undefined }));
+    setEditorNotice(null);
+  };
+
+  const handleEditorSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!editorDraft) return;
+
+    const nextErrors = validateEditorDraft(editorDraft);
+    setEditorErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) {
+      setEditorNotice(null);
+      return;
+    }
+
+    setEditorNotice('校验通过（静态预览，尚未写入星图）。');
+  };
+
   if (!node) {
     return (
       <aside className="detail-panel panel" aria-label="选中知识点详情">
@@ -85,21 +403,48 @@ export function DetailPanel({
     >
       <header className="detail-head">
         <div>
-          <span className="eyebrow">NODE DETAILS</span>
-          <span className="detail-head__label">节点详情</span>
+          <span className="eyebrow">{isEditing ? 'EDIT NODE' : 'NODE DETAILS'}</span>
+          <span className="detail-head__label">
+            {isEditing ? '编辑知识点' : '节点详情'}
+          </span>
         </div>
-        <button
-          type="button"
-          className="icon-button"
-          onClick={onClearSelection}
-          title="取消选中"
-          aria-label="取消选中当前节点"
-        >
-          <X size={14} strokeWidth={1.9} />
-        </button>
+        <div className="detail-head__actions">
+          {!isEditing && (
+            <button
+              type="button"
+              className="detail-edit-button"
+              onClick={handleStartEdit}
+            >
+              <Pencil size={12} strokeWidth={2} aria-hidden="true" />
+              编辑
+            </button>
+          )}
+          <button
+            type="button"
+            className="icon-button"
+            onClick={isEditing ? handleCancelEdit : onClearSelection}
+            title={isEditing ? '取消编辑' : '取消选中'}
+            aria-label={isEditing ? '取消编辑当前节点' : '取消选中当前节点'}
+          >
+            <X size={14} strokeWidth={1.9} />
+          </button>
+        </div>
       </header>
 
       <div className="detail-body">
+        {editorDraft ? (
+          <NodeEditorForm
+            node={node}
+            chapter={chapter}
+            draft={editorDraft}
+            errors={editorErrors}
+            notice={editorNotice}
+            onChange={handleEditorChange}
+            onCancel={handleCancelEdit}
+            onSubmit={handleEditorSubmit}
+          />
+        ) : (
+          <>
         <div className="detail-hero">
           <span className="detail-hero__visual" aria-hidden="true">
             <span className="detail-hero__halo" />
@@ -216,6 +561,8 @@ export function DetailPanel({
           </span>
           {chapter && <span className="detail-footer__caption">{chapter.caption}</span>}
         </footer>
+          </>
+        )}
       </div>
     </aside>
   );

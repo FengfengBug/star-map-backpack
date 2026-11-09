@@ -24,6 +24,7 @@ export function createKnowledgeNodes(
       chapterId: point.chapterId,
       tone: point.tone,
       relatedIds: point.relatedIds,
+      routeState: null,
     },
   }));
 }

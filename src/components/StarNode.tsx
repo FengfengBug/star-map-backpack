@@ -39,6 +39,8 @@ function StarNodeComponent({ data, selected, dragging }: NodeProps<KnowledgeFlow
         `tone-${data.tone}`,
         selected ? 'is-selected' : '',
         dragging ? 'is-dragging' : '',
+        data.routeState === 'selected' ? 'is-route-selected' : '',
+        data.routeState === 'skipped' ? 'is-route-skipped' : '',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -76,6 +78,9 @@ function StarNodeComponent({ data, selected, dragging }: NodeProps<KnowledgeFlow
       >
         <span className="star-node__title">{data.title}</span>
         {data.reviewed && <span className="star-node__reviewed-dot" aria-hidden="true" />}
+        {data.routeState === 'selected' && (
+          <span className="star-node__route-dot" aria-hidden="true" />
+        )}
       </span>
     </div>
   );

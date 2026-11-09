@@ -33,6 +33,7 @@ import type {
   KnowledgePoint,
   KnowledgePointEditableFields,
   KnowledgePointParameterFields,
+  ReviewRouteState,
 } from './types/knowledge';
 import type { NoteSourceSummary } from './types/noteSource';
 import {
@@ -51,6 +52,7 @@ import {
 import './App.css';
 
 const INITIAL_SELECTED_NODE_ID = 'binary-tree';
+const ROUTE_PREVIEW_SELECTED_COUNT = 4;
 
 function getSampleCourseEditKey(courseId: SampleCourseId) {
   return `sample:${courseId}`;
@@ -69,6 +71,30 @@ function withSelection(nodes: KnowledgeFlowNode[], selectedNodeId: string | null
     ...node,
     selected: node.id === selectedNodeId,
   }));
+}
+
+// 静态布局预览：固定取前 4 个待复习节点作为选中示例，确认后再替换为算法结果。
+function applyRoutePreview(
+  nodes: KnowledgeFlowNode[],
+  points: KnowledgePoint[],
+): KnowledgeFlowNode[] {
+  const pendingPoints = points.filter((point) => !point.reviewed);
+  const selectedIds = new Set(
+    pendingPoints.slice(0, ROUTE_PREVIEW_SELECTED_COUNT).map((point) => point.id),
+  );
+  const skippedIds = new Set(
+    pendingPoints.slice(ROUTE_PREVIEW_SELECTED_COUNT).map((point) => point.id),
+  );
+
+  return nodes.map((node) => {
+    const routeState: ReviewRouteState | null = selectedIds.has(node.id)
+      ? 'selected'
+      : skippedIds.has(node.id)
+        ? 'skipped'
+        : null;
+
+    return { ...node, data: { ...node.data, routeState } };
+  });
 }
 
 function applyNodeFields(
@@ -113,12 +139,13 @@ function StarMapWorkspace() {
   );
   const [initialNodes] = useState(() =>
     withSelection(
-      createKnowledgeNodes(coursePoints, loadNodePositions()),
+      applyRoutePreview(createKnowledgeNodes(coursePoints, loadNodePositions()), coursePoints),
       INITIAL_SELECTED_NODE_ID,
     ),
   );
   const [nodes, setNodes, onNodesChange] = useNodesState<KnowledgeFlowNode>(initialNodes);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(INITIAL_SELECTED_NODE_ID);
+  const [budgetMinutes, setBudgetMinutes] = useState(sampleCourse.reviewWindowMinutes);
   const [toast, setToast] = useState<ToastState | null>(null);
   const toastCounter = useRef(0);
   const { fitView, getNodes } = useReactFlow<KnowledgeFlowNode, KnowledgeFlowEdge>();
@@ -189,7 +216,13 @@ function StarMapWorkspace() {
         : (points[0]?.id ?? null);
 
       setSelectedNodeId(defaultSelection);
-      setNodes(withSelection(createKnowledgeNodes(points), defaultSelection));
+      setBudgetMinutes(coursePackage.course.reviewWindowMinutes);
+      setNodes(
+        withSelection(
+          applyRoutePreview(createKnowledgeNodes(points), points),
+          defaultSelection,
+        ),
+      );
       notify(`已载入「${coursePackage.course.title}」示例课程，可拖动星体调整布局`);
       fitMapToCanvas();
     },
@@ -268,7 +301,10 @@ function StarMapWorkspace() {
 
   const handleResetLayout = useCallback(() => {
     setNodes(
-      withSelection(createKnowledgeNodes(coursePoints), selectedNodeId),
+      withSelection(
+        applyRoutePreview(createKnowledgeNodes(coursePoints), coursePoints),
+        selectedNodeId,
+      ),
     );
     clearNodePositions();
     notify('星图布局已恢复');
@@ -290,7 +326,12 @@ function StarMapWorkspace() {
       });
       setActiveSampleCourseId(null);
       setSelectedNodeId(null);
-      setNodes(withSelection(createKnowledgeNodes(course.points), null));
+      setNodes(
+        withSelection(
+          applyRoutePreview(createKnowledgeNodes(course.points), course.points),
+          null,
+        ),
+      );
       notify(`已导入 ${course.points.length} 个知识点，分值占比等参数待设置`);
       fitMapToCanvas();
     },
@@ -383,7 +424,8 @@ function StarMapWorkspace() {
         />
         <ReviewRoute
           nodes={nodes}
-          reviewWindowMinutes={sampleCourse.reviewWindowMinutes}
+          budgetMinutes={budgetMinutes}
+          onBudgetChange={setBudgetMinutes}
         />
       </main>
 

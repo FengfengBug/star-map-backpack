@@ -13,6 +13,9 @@
   color: var(--tone);
   cursor: grab;
   user-select: none;
+  transition:
+    opacity 200ms ease,
+    filter 200ms ease;
 }
 
 .star-node.is-dragging {
@@ -142,6 +145,15 @@
   box-shadow: 0 0 5px rgba(124, 226, 188, 0.35);
 }
 
+.star-node__route-dot {
+  width: 4px;
+  height: 4px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #e8c174;
+  box-shadow: 0 0 6px rgba(232, 193, 116, 0.45);
+}
+
 .star-node:hover .star-node__visual {
   opacity: min(1, calc(var(--star-intensity) + 0.13));
 }
@@ -193,6 +205,30 @@
   background: rgba(10, 20, 38, 0.95);
 }
 
+.star-node.is-route-selected .star-node__label {
+  border-color: rgba(232, 193, 116, 0.24);
+}
+
+.star-node.is-route-skipped {
+  opacity: 0.38;
+  filter: saturate(0.6);
+}
+
+.star-node.is-route-skipped:hover,
+.star-node.is-route-skipped.is-selected {
+  opacity: 1;
+  filter: none;
+}
+
+.star-node.is-route-skipped .star-node__label {
+  color: var(--muted-2);
+}
+
+.star-node.is-route-skipped:hover .star-node__label,
+.star-node.is-route-skipped.is-selected .star-node__label {
+  color: #aebbd2;
+}
+
 .react-flow__node-knowledge:focus-visible {
   outline: none;
 }
@@ -203,6 +239,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .star-node,
   .star-node__visual,
   .star-node__orbit,
   .star-node__glyph,

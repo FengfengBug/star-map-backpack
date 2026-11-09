@@ -39,6 +39,8 @@ export type KnowledgePointParameterFields = Pick<
   'scoreShare' | 'estimatedMinutes' | 'mastery'
 >;
 
+export type ReviewRouteState = 'selected' | 'skipped';
+
 export interface KnowledgeNodeData extends Record<string, unknown> {
   title: string;
   content: string;
@@ -50,6 +52,7 @@ export interface KnowledgeNodeData extends Record<string, unknown> {
   chapterId: ChapterId;
   tone: StarTone;
   relatedIds: string[];
+  routeState: ReviewRouteState | null;
 }
 
 export type KnowledgeFlowNode = Node<KnowledgeNodeData, 'knowledge'>;

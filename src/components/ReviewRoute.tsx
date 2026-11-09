@@ -1,4 +1,4 @@
-import { Compass, Eye, Flag, Lock, Route } from 'lucide-react';
+import { Compass, Flag, Lock, Route } from 'lucide-react';
 import type { KnowledgeFlowNode } from '../types/knowledge';
 import { formatDuration } from '../utils/star';
 import { sumPendingMinutes } from '../utils/knowledgeGraph';
@@ -35,8 +35,8 @@ export function ReviewRoute({
         <div className="route-intro__title">
           <h2 id="review-route-heading">复习航线</h2>
           <span className="route-status">
-            <Eye size={9} strokeWidth={2} aria-hidden="true" />
-            布局预览
+            <Route size={9} strokeWidth={2} aria-hidden="true" />
+            按预算规划
           </span>
         </div>
         <p>把有限的时间，留给最值得复习的知识点。</p>
@@ -73,7 +73,7 @@ export function ReviewRoute({
         <div className="route-budget">
           <div className="route-budget__head">
             <label htmlFor="route-budget">时间预算</label>
-            <span className="route-preview-tag">静态预览</span>
+            <span className="route-budget__tag">按预算重算</span>
             <strong>{formatDuration(budgetMinutes)}</strong>
           </div>
           <input
@@ -84,7 +84,7 @@ export function ReviewRoute({
             max={MAX_BUDGET_MINUTES}
             step={BUDGET_STEP_MINUTES}
             value={budgetMinutes}
-            aria-valuetext={`${formatDuration(budgetMinutes)}，静态预览，选中 ${selectedCount} 个，放弃 ${skippedCount} 个`}
+            aria-valuetext={`${formatDuration(budgetMinutes)}，选中 ${selectedCount} 个，放弃 ${skippedCount} 个`}
             onChange={(event) => onBudgetChange(Number(event.target.value))}
           />
           <div className="route-budget__scale" aria-hidden="true">
@@ -125,14 +125,14 @@ export function ReviewRoute({
           type="button"
           className="route-action"
           disabled
-          title="静态布局预览，确认后接入航线规划"
+          title="航线路径动画将在后续任务接入"
         >
           <Route size={14} strokeWidth={1.8} aria-hidden="true" />
           生成复习航线
           <Lock size={10} strokeWidth={2} aria-hidden="true" />
         </button>
         <p className="route-side__hint">
-          布局预览：拖动滑块暂不重算航线，确认后接入 0-1 背包
+          拖动滑块后按时间预算重算；航线路径动画将在后续任务接入
         </p>
       </div>
     </section>

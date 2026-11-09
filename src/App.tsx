@@ -6,6 +6,7 @@ import {
   type OnNodeDrag,
   type OnNodesChange,
 } from '@xyflow/react';
+import { planReviewRoute } from './algorithms/knapsack';
 import { DetailPanel } from './components/DetailPanel';
 import { Header } from './components/Header';
 import { KnowledgeGraph } from './components/KnowledgeGraph';
@@ -40,6 +41,10 @@ import {
   createKnowledgeEdges,
   createKnowledgeNodes,
 } from './utils/knowledgeGraph';
+import {
+  createReviewRouteItems,
+  createRouteStateMap,
+} from './utils/reviewRoute';
 import { formatMastery, formatScoreShare } from './utils/star';
 import {
   applySavedNodeEdits,
@@ -52,7 +57,7 @@ import {
 import './App.css';
 
 const INITIAL_SELECTED_NODE_ID = 'binary-tree';
-const ROUTE_PREVIEW_SELECTED_COUNT = 4;
+const ROUTE_RECALC_DELAY_MS = 200;
 
 function getSampleCourseEditKey(courseId: SampleCourseId) {
   return `sample:${courseId}`;
@@ -73,28 +78,26 @@ function withSelection(nodes: KnowledgeFlowNode[], selectedNodeId: string | null
   }));
 }
 
-// 静态布局预览：固定取前 4 个待复习节点作为选中示例，确认后再替换为算法结果。
-function applyRoutePreview(
+function createRouteStates(points: KnowledgePoint[], budgetMinutes: number) {
+  return createRouteStateMap(
+    planReviewRoute(createReviewRouteItems(points), budgetMinutes),
+  );
+}
+
+function applyRouteStates(
   nodes: KnowledgeFlowNode[],
-  points: KnowledgePoint[],
+  routeStates: Map<string, ReviewRouteState>,
 ): KnowledgeFlowNode[] {
-  const pendingPoints = points.filter((point) => !point.reviewed);
-  const selectedIds = new Set(
-    pendingPoints.slice(0, ROUTE_PREVIEW_SELECTED_COUNT).map((point) => point.id),
-  );
-  const skippedIds = new Set(
-    pendingPoints.slice(ROUTE_PREVIEW_SELECTED_COUNT).map((point) => point.id),
-  );
+  let hasChanged = false;
+  const nextNodes = nodes.map((node) => {
+    const routeState = routeStates.get(node.id) ?? null;
+    if (node.data.routeState === routeState) return node;
 
-  return nodes.map((node) => {
-    const routeState: ReviewRouteState | null = selectedIds.has(node.id)
-      ? 'selected'
-      : skippedIds.has(node.id)
-        ? 'skipped'
-        : null;
-
+    hasChanged = true;
     return { ...node, data: { ...node.data, routeState } };
   });
+
+  return hasChanged ? nextNodes : nodes;
 }
 
 function applyNodeFields(
@@ -139,13 +142,19 @@ function StarMapWorkspace() {
   );
   const [initialNodes] = useState(() =>
     withSelection(
-      applyRoutePreview(createKnowledgeNodes(coursePoints, loadNodePositions()), coursePoints),
+      applyRouteStates(
+        createKnowledgeNodes(coursePoints, loadNodePositions()),
+        createRouteStates(coursePoints, sampleCourse.reviewWindowMinutes),
+      ),
       INITIAL_SELECTED_NODE_ID,
     ),
   );
   const [nodes, setNodes, onNodesChange] = useNodesState<KnowledgeFlowNode>(initialNodes);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(INITIAL_SELECTED_NODE_ID);
   const [budgetMinutes, setBudgetMinutes] = useState(sampleCourse.reviewWindowMinutes);
+  const [plannedBudgetMinutes, setPlannedBudgetMinutes] = useState(
+    sampleCourse.reviewWindowMinutes,
+  );
   const [toast, setToast] = useState<ToastState | null>(null);
   const toastCounter = useRef(0);
   const { fitView, getNodes } = useReactFlow<KnowledgeFlowNode, KnowledgeFlowEdge>();
@@ -169,6 +178,25 @@ function StarMapWorkspace() {
 
     return () => window.clearTimeout(timer);
   }, [fitView]);
+
+  useEffect(() => {
+    if (plannedBudgetMinutes === budgetMinutes) return;
+
+    const timer = window.setTimeout(
+      () => setPlannedBudgetMinutes(budgetMinutes),
+      ROUTE_RECALC_DELAY_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [budgetMinutes, plannedBudgetMinutes]);
+
+  useEffect(() => {
+    setNodes((currentNodes) =>
+      applyRouteStates(
+        currentNodes,
+        createRouteStates(coursePoints, plannedBudgetMinutes),
+      ),
+    );
+  }, [coursePoints, plannedBudgetMinutes, setNodes]);
 
   const handleSelectNode = useCallback(
     (nodeId: string | null) => {
@@ -217,9 +245,13 @@ function StarMapWorkspace() {
 
       setSelectedNodeId(defaultSelection);
       setBudgetMinutes(coursePackage.course.reviewWindowMinutes);
+      setPlannedBudgetMinutes(coursePackage.course.reviewWindowMinutes);
       setNodes(
         withSelection(
-          applyRoutePreview(createKnowledgeNodes(points), points),
+          applyRouteStates(
+            createKnowledgeNodes(points),
+            createRouteStates(points, coursePackage.course.reviewWindowMinutes),
+          ),
           defaultSelection,
         ),
       );
@@ -302,14 +334,24 @@ function StarMapWorkspace() {
   const handleResetLayout = useCallback(() => {
     setNodes(
       withSelection(
-        applyRoutePreview(createKnowledgeNodes(coursePoints), coursePoints),
+        applyRouteStates(
+          createKnowledgeNodes(coursePoints),
+          createRouteStates(coursePoints, plannedBudgetMinutes),
+        ),
         selectedNodeId,
       ),
     );
     clearNodePositions();
     notify('星图布局已恢复');
     fitMapToCanvas();
-  }, [coursePoints, fitMapToCanvas, notify, selectedNodeId, setNodes]);
+  }, [
+    coursePoints,
+    fitMapToCanvas,
+    notify,
+    plannedBudgetMinutes,
+    selectedNodeId,
+    setNodes,
+  ]);
 
   const handleImportConfirm = useCallback(
     (course: ImportedCourse) => {
@@ -328,14 +370,17 @@ function StarMapWorkspace() {
       setSelectedNodeId(null);
       setNodes(
         withSelection(
-          applyRoutePreview(createKnowledgeNodes(course.points), course.points),
+          applyRouteStates(
+            createKnowledgeNodes(course.points),
+            createRouteStates(course.points, plannedBudgetMinutes),
+          ),
           null,
         ),
       );
       notify(`已导入 ${course.points.length} 个知识点，分值占比等参数待设置`);
       fitMapToCanvas();
     },
-    [fitMapToCanvas, notify, setNodes],
+    [fitMapToCanvas, notify, plannedBudgetMinutes, setNodes],
   );
 
   const handleNodesChange = useCallback<OnNodesChange<KnowledgeFlowNode>>(

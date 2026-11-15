@@ -61,7 +61,7 @@ export function Sidebar({
       <section className="note-source" aria-labelledby="note-source-heading">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">NOTE SOURCE</span>
+            <span className="eyebrow">资料来源</span>
             <h2 id="note-source-heading">复习笔记</h2>
           </div>
           <button
@@ -146,7 +146,7 @@ export function Sidebar({
       <section className="outline" aria-labelledby="outline-heading">
         <div className="section-heading section-heading--outline">
           <div>
-            <span className="eyebrow">KNOWLEDGE INDEX</span>
+            <span className="eyebrow">课程结构</span>
             <h2 id="outline-heading">知识点目录</h2>
           </div>
           <span className="count-badge">{nodes.length}</span>

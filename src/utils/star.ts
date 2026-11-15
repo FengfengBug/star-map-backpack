@@ -1,10 +1,10 @@
 import type { StarTone } from '../types/knowledge';
 
 export const starToneColors: Record<StarTone, string> = {
-  blue: '#7eaeff',
-  cyan: '#63e1da',
-  violet: '#b09aff',
-  gold: '#f2c86d',
+  blue: '#5278ad',
+  cyan: '#398b8b',
+  violet: '#7969a1',
+  gold: '#aa812f',
 };
 
 export const starToneLabels: Record<StarTone, string> = {

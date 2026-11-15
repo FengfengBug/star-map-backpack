@@ -17,7 +17,7 @@ export function ConstellationEdge({
     targetY,
   });
 
-  const color = data?.tone ? starToneColors[data.tone] : '#7eaeff';
+  const color = data?.tone ? starToneColors[data.tone] : '#5278ad';
   const relation = data?.relation ?? 'parent';
   const isActive = data?.active ?? false;
 

@@ -12,7 +12,6 @@ import { Header } from './components/Header';
 import { KnowledgeGraph } from './components/KnowledgeGraph';
 import { ReviewRoute } from './components/ReviewRoute';
 import { Sidebar } from './components/Sidebar';
-import { StarBackdrop } from './components/StarBackdrop';
 import { Toast } from './components/Toast';
 import {
   chapters,
@@ -446,7 +445,6 @@ function StarMapWorkspace() {
 
   return (
     <div className="app-shell">
-      <StarBackdrop />
       <Header
         courseTitle={courseTitle}
         courseTag={noteSource.kind === 'sample' ? '示例' : '导入'}

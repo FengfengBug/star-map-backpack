@@ -191,7 +191,7 @@ export function NoteImportPreview({
       >
         <header className="import-modal__header">
           <div className="import-modal__heading">
-            <span className="eyebrow">NOTE IMPORT / 笔记导入</span>
+            <span className="eyebrow">导入课程笔记</span>
             <div className="import-modal__title-row">
               <h2 id="import-modal-title">{step === 'preview' ? '解析预览' : '确认导入'}</h2>
               <span className="import-preview-tag">
@@ -373,7 +373,7 @@ function PreviewStep({
 
       <div className="import-input">
         <div className="import-input__head">
-          <span className="eyebrow">PASTE OR UPLOAD</span>
+          <span className="eyebrow">粘贴或选择文件</span>
           <span className="import-input__hint">
             支持标题层级：# / ## / ###；上限 {MAX_IMPORT_CHARACTERS.toLocaleString('zh-CN')}{' '}
             字符
@@ -489,7 +489,7 @@ function PreviewStep({
 
             <aside className="import-summary" aria-label="导入摘要">
               <div className="import-summary__card">
-                <span className="eyebrow">IMPORT SUMMARY</span>
+                <span className="eyebrow">解析结果</span>
                 <h3>本次将生成</h3>
                 <dl className="import-summary__stats">
                   <div>
@@ -539,7 +539,7 @@ function ConfirmStep({ result, stats, currentNodeCount }: ConfirmStepProps) {
         <span className="import-confirm__icon" aria-hidden="true">
           <Layers3 size={20} strokeWidth={1.8} />
         </span>
-        <span className="import-confirm__eyebrow">READY TO IMPORT</span>
+        <span className="import-confirm__eyebrow">准备导入</span>
         <h3>确认导入 {stats.nodes} 个知识点？</h3>
         <p>
           “{result.summary.fileName}”的解析结果将替换当前星图；确认前不会修改现有节点。

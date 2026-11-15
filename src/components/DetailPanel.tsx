@@ -349,7 +349,7 @@ export function DetailPanel({
       <aside className="detail-panel panel" aria-label="选中知识点详情">
         <header className="detail-head">
           <div>
-            <span className="eyebrow">NODE DETAILS</span>
+            <span className="eyebrow">知识点</span>
             <span className="detail-head__label">节点详情</span>
           </div>
         </header>
@@ -361,7 +361,7 @@ export function DetailPanel({
             <span className="detail-empty__core" />
             <span className="detail-empty__satellite" />
           </div>
-          <span className="eyebrow">NO STAR SELECTED</span>
+          <span className="eyebrow">从这里开始</span>
           <h2>选择一颗知识星</h2>
           <p>点击星图中的星体，或从左侧目录选择知识点，查看它的摘要、权重与掌握度。</p>
           <div className="detail-empty__hints">
@@ -385,7 +385,7 @@ export function DetailPanel({
     >
       <header className="detail-head">
         <div>
-          <span className="eyebrow">{isEditing ? 'EDIT NODE' : 'NODE DETAILS'}</span>
+          <span className="eyebrow">{isEditing ? '编辑中' : '知识点'}</span>
           <span className="detail-head__label">
             {isEditing ? '编辑知识点' : '节点详情'}
           </span>

@@ -39,7 +39,7 @@ export function ReviewRoute({
   return (
     <section className="route-panel panel" aria-labelledby="review-route-heading">
       <div className="route-intro">
-        <span className="eyebrow">REVIEW ROUTE</span>
+        <span className="eyebrow">复习规划</span>
         <div className="route-intro__title">
           <h2 id="review-route-heading">复习航线</h2>
           <span className="route-status">

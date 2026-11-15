@@ -14,8 +14,9 @@
   cursor: grab;
   user-select: none;
   transition:
-    opacity 200ms ease,
-    filter 200ms ease;
+    opacity 200ms var(--ease-damped),
+    filter 200ms var(--ease-damped),
+    transform 360ms var(--ease-damped);
 }
 
 .star-node.is-dragging {
@@ -30,11 +31,12 @@
   place-items: center;
   width: 68px;
   height: 68px;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(1);
   opacity: var(--star-intensity);
   transition:
-    opacity 180ms ease,
-    filter 180ms ease;
+    opacity 200ms var(--ease-damped),
+    filter 200ms var(--ease-damped),
+    transform 360ms var(--ease-damped);
 }
 
 .star-node__halo {
@@ -60,8 +62,8 @@
   opacity: 0;
   transform: scale(0.9);
   transition:
-    opacity 180ms ease,
-    transform 220ms ease;
+    opacity 180ms var(--ease-damped),
+    transform 320ms var(--ease-damped);
 }
 
 .star-node__glyph {
@@ -69,8 +71,11 @@
   width: var(--star-size);
   height: var(--star-size);
   overflow: visible;
-  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--tone) 36%, transparent));
-  transition: filter 180ms ease;
+  filter: drop-shadow(0 1px 2px color-mix(in srgb, var(--tone) 20%, transparent));
+  transition:
+    filter 220ms var(--ease-damped),
+    width 360ms var(--ease-damped),
+    height 360ms var(--ease-damped);
 }
 
 .star-node__star,
@@ -95,13 +100,13 @@
   position: absolute;
   width: calc(var(--star-size) + 28px);
   height: calc(var(--star-size) + 28px);
-  border: 1px dashed color-mix(in srgb, var(--tone) 46%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tone) 30%, white);
   border-radius: 50%;
   opacity: 0;
-  transform: scale(0.82);
+  transform: scale(0.88);
   transition:
-    opacity 180ms ease,
-    transform 220ms ease;
+    opacity 200ms var(--ease-damped),
+    transform 360ms var(--ease-damped);
 }
 
 .star-node__label {
@@ -115,8 +120,7 @@
   padding: 3px 8px;
   border: 1px solid transparent;
   border-radius: 6px;
-  background: rgba(5, 11, 23, 0.42);
-  color: #aebbd2;
+  color: var(--text-soft);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.005em;
@@ -124,11 +128,11 @@
   white-space: nowrap;
   transform: translateX(-50%);
   transition:
-    color 160ms ease,
-    border-color 160ms ease,
-    background-color 160ms ease,
-    box-shadow 160ms ease;
-  backdrop-filter: blur(5px);
+    color 200ms var(--ease-damped),
+    border-color 200ms var(--ease-damped),
+    background-color 200ms var(--ease-damped),
+    box-shadow 240ms var(--ease-damped);
+  background: rgba(255, 255, 255, 0.94);
 }
 
 .star-node__title {
@@ -150,8 +154,8 @@
   height: 4px;
   flex: 0 0 auto;
   border-radius: 50%;
-  background: #e8c174;
-  box-shadow: 0 0 6px rgba(232, 193, 116, 0.45);
+  background: var(--star-gold);
+  box-shadow: 0 1px 4px rgba(170, 129, 47, 0.24);
 }
 
 .star-node:hover .star-node__visual {
@@ -164,12 +168,12 @@
 }
 
 .star-node:hover .star-node__glyph {
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--tone) 48%, transparent));
+  filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--tone) 22%, transparent));
 }
 
 .star-node:hover .star-node__label {
   border-color: color-mix(in srgb, var(--tone) 18%, transparent);
-  background: rgba(9, 18, 34, 0.78);
+  background: rgba(255, 255, 255, 0.96);
   color: var(--text-soft);
 }
 
@@ -188,21 +192,27 @@
 }
 
 .star-node.is-selected .star-node__glyph {
-  filter: drop-shadow(0 0 9px color-mix(in srgb, var(--tone) 62%, transparent));
+  filter: drop-shadow(0 2px 5px color-mix(in srgb, var(--tone) 28%, transparent));
 }
 
 .star-node.is-selected .star-node__label {
   border-color: color-mix(in srgb, var(--tone) 33%, transparent);
-  background: rgba(10, 20, 38, 0.92);
+  background: rgba(255, 255, 255, 0.98);
   box-shadow:
-    0 3px 12px rgba(0, 0, 0, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  color: #f2f7ff;
+    0 5px 14px rgba(40, 56, 75, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  color: var(--text);
+}
+
+.star-node.is-dragging .star-node__visual {
+  transform: translateX(-50%) scale(0.94);
+  filter: drop-shadow(0 5px 7px rgba(35, 52, 73, 0.16));
+  transition: none;
 }
 
 .star-node.is-dragging .star-node__label {
   border-color: color-mix(in srgb, var(--tone) 32%, transparent);
-  background: rgba(10, 20, 38, 0.95);
+  background: rgba(255, 255, 255, 0.98);
 }
 
 .star-node.is-route-selected .star-node__label {
@@ -210,7 +220,7 @@
 }
 
 .star-node.is-route-skipped {
-  opacity: 0.38;
+  opacity: 0.48;
   filter: saturate(0.6);
 }
 
@@ -226,7 +236,7 @@
 
 .star-node.is-route-skipped:hover .star-node__label,
 .star-node.is-route-skipped.is-selected .star-node__label {
-  color: #aebbd2;
+  color: var(--text-soft);
 }
 
 .react-flow__node-knowledge:focus-visible {

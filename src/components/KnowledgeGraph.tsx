@@ -39,19 +39,19 @@ export function KnowledgeGraph({
     <section className="graph-panel panel" aria-labelledby="graph-heading">
       <header className="graph-header">
         <div>
-          <span className="eyebrow">KNOWLEDGE CONSTELLATION</span>
+          <span className="eyebrow">拖动整理知识点</span>
           <div className="graph-header__title-row">
             <h2 id="graph-heading">知识星图</h2>
             <span className="graph-sync">
               <span className="graph-sync__dot" aria-hidden="true" />
-              布局自动保存
+              位置自动保存
             </span>
           </div>
         </div>
 
         <div className="graph-actions">
           <span className="graph-count">
-            <strong>{nodes.length}</strong> 颗星
+            <strong>{nodes.length}</strong> 个知识点
             <span className="graph-count__divider" aria-hidden="true" />
             <strong>{relationCount}</strong> 条关联
           </span>
@@ -85,9 +85,9 @@ export function KnowledgeGraph({
         >
           <Background
             variant={BackgroundVariant.Dots}
-            gap={30}
+            gap={28}
             size={1}
-            color="rgba(132, 163, 224, 0.14)"
+            color="rgba(98, 122, 151, 0.14)"
           />
           <Controls showInteractive={false} position="bottom-right" />
         </ReactFlow>

@@ -5,8 +5,9 @@
   display: grid;
   place-items: center;
   padding: 24px;
-  background: rgba(2, 6, 15, 0.72);
-  backdrop-filter: blur(10px);
+  background: rgba(30, 42, 56, 0.24);
+  backdrop-filter: blur(12px) saturate(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
   animation: sample-overlay-in 180ms ease-out both;
 }
 
@@ -17,11 +18,9 @@
   max-height: calc(100dvh - 48px);
   overflow: hidden;
   border-color: var(--border-strong);
-  background:
-    radial-gradient(ellipse 60% 40% at 18% 0%, rgba(63, 111, 191, 0.14), transparent 64%),
-    linear-gradient(152deg, rgba(17, 30, 56, 0.98), rgba(6, 12, 24, 0.99) 62%);
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.52);
-  animation: sample-modal-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  background: linear-gradient(155deg, #fff, #f8fafc 78%);
+  box-shadow: 0 32px 80px rgba(30, 42, 56, 0.2);
+  animation: sample-modal-in 360ms var(--ease-damped) both;
 }
 
 .sample-modal__header {
@@ -30,7 +29,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 20px 24px 16px;
-  border-bottom: 1px solid rgba(127, 158, 219, 0.09);
+  border-bottom: 1px solid var(--border);
 }
 
 .sample-modal__title-row {
@@ -57,7 +56,7 @@
   border: 1px solid rgba(242, 200, 109, 0.24);
   border-radius: 6px;
   background: rgba(242, 200, 109, 0.07);
-  color: #e8c57e;
+  color: #80601e;
   font-size: 9px;
   letter-spacing: 0.03em;
   white-space: nowrap;
@@ -71,17 +70,18 @@
   flex: 0 0 auto;
   border: 1px solid var(--border);
   border-radius: 8px;
-  background: rgba(116, 151, 221, 0.045);
+  background: var(--glass-surface);
   color: var(--muted);
   transition:
-    color 140ms ease,
-    border-color 140ms ease,
-    background-color 140ms ease;
+    color 180ms var(--ease-damped),
+    border-color 180ms var(--ease-damped),
+    background-color 180ms var(--ease-damped),
+    transform 320ms var(--ease-damped);
 }
 
 .sample-modal__close:hover {
   border-color: var(--border-strong);
-  background: rgba(116, 151, 221, 0.09);
+  background: rgba(82, 120, 173, 0.09);
   color: var(--text-soft);
 }
 
@@ -97,7 +97,7 @@
   padding: 10px 12px;
   border: 1px solid rgba(242, 200, 109, 0.14);
   border-radius: 10px;
-  background: rgba(242, 200, 109, 0.035);
+  background: rgba(170, 129, 47, 0.055);
   color: var(--muted);
   font-size: 10.5px;
   line-height: 1.7;
@@ -116,14 +116,13 @@
   padding: 14px;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background:
-    linear-gradient(150deg, rgba(29, 51, 88, 0.22), transparent 62%),
-    rgba(13, 23, 43, 0.55);
+  background: rgba(255, 255, 255, 0.84);
   color: inherit;
   text-align: left;
   transition:
-    border-color 160ms ease,
-    background-color 160ms ease;
+    border-color 180ms var(--ease-damped),
+    background-color 180ms var(--ease-damped),
+    transform 320ms var(--ease-damped);
 }
 
 .sample-card:hover {
@@ -134,7 +133,7 @@
   border-color: color-mix(in srgb, var(--tone) 30%, transparent);
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--tone) 10%, transparent), transparent 68%),
-    rgba(15, 27, 50, 0.72);
+    rgba(241, 245, 249, 0.92);
 }
 
 .sample-card__top {
@@ -251,8 +250,8 @@
   flex-wrap: wrap;
   gap: 14px;
   padding: 16px 24px;
-  border-top: 1px solid rgba(127, 158, 219, 0.08);
-  background: rgba(6, 13, 27, 0.45);
+  border-top: 1px solid var(--border);
+  background: rgba(246, 248, 251, 0.84);
 }
 
 .sample-footer-note {
@@ -283,14 +282,15 @@
   letter-spacing: 0.02em;
   white-space: nowrap;
   transition:
-    border-color 140ms ease,
-    background-color 140ms ease,
-    color 140ms ease;
+    border-color 180ms var(--ease-damped),
+    background-color 180ms var(--ease-damped),
+    color 180ms var(--ease-damped),
+    transform 320ms var(--ease-damped);
 }
 
 .sample-button--quiet {
   border-color: var(--border);
-  background: rgba(116, 151, 221, 0.04);
+  background: rgba(255, 255, 255, 0.86);
   color: var(--muted);
 }
 
@@ -300,16 +300,15 @@
 }
 
 .sample-button--primary {
-  border-color: rgba(124, 183, 255, 0.26);
-  background:
-    linear-gradient(135deg, rgba(110, 164, 255, 0.18), rgba(91, 211, 203, 0.09)),
-    rgba(15, 29, 52, 0.48);
-  color: #dbe9ff;
+  border-color: #456d9f;
+  background: #5278ad;
+  color: #fff;
 }
 
 .sample-button--primary:hover:not(:disabled) {
-  border-color: rgba(142, 199, 255, 0.38);
-  color: #f4f9ff;
+  border-color: #3e6597;
+  background: #456d9f;
+  color: #fff;
 }
 
 .sample-button--primary:disabled {
@@ -391,5 +390,13 @@
   .sample-overlay,
   .sample-modal {
     animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .sample-modal__close,
+  .sample-button {
+    min-width: 44px;
+    min-height: 44px;
   }
 }

@@ -78,7 +78,6 @@ star-map-backpack/
 │  │  ├─ ReviewRouteEdge.tsx  按算法顺序绘制的金色航线边（分段点亮）
 │  │  ├─ NoteImportPreview.tsx 笔记导入弹窗、预览与确认流程
 │  │  ├─ SampleCoursePicker.tsx 示例课程选择、课程信息与确认载入
-│  │  ├─ StarBackdrop.tsx      确定性星空背景
 │  │  ├─ StarGlyph.tsx         复用星形 SVG
 │  │  └─ Toast.tsx             轻量操作反馈
 │  ├─ data/
@@ -132,7 +131,7 @@ star-map-backpack/
 | `ConstellationEdge` | 父子关系使用实线，关联关系使用虚线；选中节点关联边高亮并出现中点光点。 |
 | `DetailPanel` | 展示摘要、分值占比、预计用时、掌握度、上级与关联节点；支持跳转，并可编辑与保存节点字段。 |
 | `RangeNumberField` | 滑块与数字输入双向联动；留空“待设置”，越界与小数即时提示，支持键盘与触控。 |
-| `ReviewRoute` | 展示复习池、待复习时长与可用时间；生成按钮明确标记为算法阶段接入。 |
+| `ReviewRoute` | 展示复习预算、航线统计和航线动画操作。 |
 | `NoteImportPreview` | 粘贴或选择 Markdown/TXT 文件，解析预览、错误提示与确认替换；明确标注参数待设置。 |
 
 ## 数据模型
@@ -175,7 +174,8 @@ star-map-backpack/
 
 ## 设计与实现说明
 
-- 深蓝黑宇宙背景，星体仅使用蓝、青、紫与少量金色，避免高频随机动画。
+- 浅色工作台承载课程内容；星点只用于知识节点，背景不铺设星尘。Liquid Glass 仅用于导航与浮动控件，拖拽释放使用短促强阻尼回稳。
+- 视觉方向参考 [Apple Materials](https://developer.apple.com/design/human-interface-guidelines/materials/) 与 [Linear 的界面刷新](https://linear.app/now/behind-the-latest-design-refresh)：保持内容表面清晰、层级克制并给信息留出呼吸空间。
 - 组件样式与业务逻辑分离，节点/边转换和存储逻辑位于 `src/utils/`。
 - 示例课程通过 `src/data/sampleCourses.ts` 注册表并存：保留数据结构与算法示例，新增计算机组成原理示例，互不覆盖。
 - 解析与映射位于 `src/parsers/`：`parseNote` 负责结构解析，`toKnowledgeNodes` 生成节点并按同级相邻关系生成去重关联边；`importedNote` 负责字符/文件/节点数校验、章节生成与课程摘要；全流程不伪造分值、掌握度或时间。
@@ -197,7 +197,7 @@ star-map-backpack/
 - 待设置与非法参数理由会列出具体字段与当前值；未入选理由会引用自身收益与选中组合总收益。
 - 测试：`npm test` 同时运行边界/理由单测、航线状态与航线边时序测试，以及两套示例课程集成测试；集成测试覆盖预算 0、超预算、全选、复习池过滤、确定性与多档预算，并用暴力枚举校验最优总收益。
 - 界面联动：未复习节点构成复习池，滑块预算变化经 200ms 防抖后调用算法；选中节点显示金色航线点，放弃节点淡化，待设置/非法参数节点保持中性。算法结果不写入 LocalStorage，刷新后按当前参数重新计算。
-- 航线动画：选中节点按算法顺序用贝塞尔曲线串联，每段 520ms、段间 40ms，缓动为 `cubic-bezier(0.22, 1, 0.36, 1)`；点击“生成复习航线”重播，关闭开关后完整静态显示；`prefers-reduced-motion` 下默认关闭，窄屏降低描边宽度。
+- 航线动画：选中节点按算法顺序用贝塞尔曲线串联，每段 520ms、段间 40ms，缓动为 `cubic-bezier(0.2, 0.72, 0.18, 1)`；点击“生成复习航线”重播，关闭开关后完整静态显示；`prefers-reduced-motion` 下默认关闭，窄屏降低描边宽度。
 
 ## 后续路线
 

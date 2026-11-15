@@ -29,27 +29,27 @@
   padding: 4px 24px 4px 7px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  background: rgba(8, 16, 31, 0.62);
-  color: var(--text-soft);
+  background: #fff;
+  color: var(--text);
   font-family: var(--font-mono);
   font-size: 11px;
   line-height: 1.6;
   text-align: right;
   transition:
-    border-color 140ms ease,
-    background-color 140ms ease,
-    box-shadow 140ms ease;
+    border-color 180ms var(--ease-damped),
+    background-color 180ms var(--ease-damped),
+    box-shadow 180ms var(--ease-damped);
 }
 
 .range-field__input:focus {
   outline: none;
-  border-color: rgba(126, 190, 255, 0.34);
-  box-shadow: 0 0 0 3px rgba(94, 151, 255, 0.08);
+  border-color: rgba(82, 120, 173, 0.48);
+  box-shadow: 0 0 0 3px rgba(82, 120, 173, 0.11);
 }
 
 .range-field__input.is-invalid {
-  border-color: rgba(226, 138, 148, 0.42);
-  background: rgba(94, 33, 46, 0.18);
+  border-color: rgba(180, 79, 89, 0.42);
+  background: rgba(180, 79, 89, 0.07);
 }
 
 .range-field__input::placeholder {
@@ -80,12 +80,12 @@
   width: 100%;
   height: 24px;
   margin: 0;
-  accent-color: var(--tone, #7eaeff);
+  accent-color: var(--tone, var(--star-blue));
   cursor: pointer;
 }
 
 .range-field__slider:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--tone, #7eaeff) 55%, transparent);
+  outline: 2px solid color-mix(in srgb, var(--tone, var(--star-blue)) 55%, transparent);
   outline-offset: 1px;
   border-radius: 999px;
 }
@@ -112,5 +112,5 @@
 }
 
 .range-field__message.is-error {
-  color: #e6a0a8;
+  color: #a83e4b;
 }

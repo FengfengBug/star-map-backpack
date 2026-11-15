@@ -11,30 +11,30 @@
 
 .constellation-edge__halo {
   stroke-width: 5;
-  opacity: 0.045;
+  opacity: 0.035;
 }
 
 .constellation-edge__line {
   stroke-width: 1;
-  opacity: 0.3;
+  opacity: 0.2;
 }
 
 .constellation-edge--related .constellation-edge__line {
-  opacity: 0.24;
-  stroke-dasharray: 2.5 5.5;
+  opacity: 0.18;
+  stroke-dasharray: 2 6;
 }
 
 .constellation-edge--related .constellation-edge__halo {
-  opacity: 0.025;
+  opacity: 0.02;
 }
 
 .constellation-edge.is-active .constellation-edge__halo {
-  opacity: 0.14;
+  opacity: 0.1;
 }
 
 .constellation-edge.is-active .constellation-edge__line {
   stroke-width: 1.35;
-  opacity: 0.82;
+  opacity: 0.7;
 }
 
 .constellation-edge.is-active.constellation-edge--related .constellation-edge__line {

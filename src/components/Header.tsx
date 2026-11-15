@@ -14,12 +14,11 @@ export function Header({ courseTitle, courseTag, reviewWindowMinutes }: HeaderPr
     <header className="topbar">
       <div className="brand" aria-label="星图背包">
         <span className="brand__mark" aria-hidden="true">
-          <span className="brand__orbit" />
           <StarGlyph tone="cyan" size={22} />
         </span>
         <span className="brand__copy">
           <span className="brand__name">星图背包</span>
-          <span className="brand__sub">STAR MAP BACKPACK</span>
+          <span className="brand__sub">把笔记理成知识图</span>
         </span>
       </div>
 

@@ -86,7 +86,7 @@ export function SampleCoursePicker({
       >
         <header className="sample-modal__header">
           <div>
-            <span className="eyebrow">SAMPLE COURSES / 示例课程</span>
+            <span className="eyebrow">选择课程</span>
             <div className="sample-modal__title-row">
               <h2 id="sample-modal-title">选择示例课程</h2>
               <span className="sample-modal__tag">

@@ -79,3 +79,9 @@
 简要说明：完成 Task 5.1 时间预算滑块与 0-1 背包真实联动，未复习节点构成复习池，预算变化经 200ms 防抖后重算；选中节点显示金色航线点、放弃节点淡化，待设置/非法参数节点保持中性；编辑保存、课程切换、恢复布局与导入后均按当前预算重新计算，算法结果不写入 LocalStorage；新增航线状态映射与 4 项测试，`npm test` 69/69、`npm run build` 成功。
 
 ![](screenshots/2026-11-09-task-51-budget-knapsack-01.png)
+
+### 2026-11-15 · 路线图 v1.6：Qoder Sites 部署任务与产品边界
+
+简要说明：为满足参赛部署要求新增 Task 7.6「Qoder Sites 部署与线上验收」，并将 Task 7.99 的前置条件改为 Task 7.6；AI 辅助暂缓，Task 7.1、Task 7.2 移入 Backlog 并登记 B-13，Task 7.3 去除 AI 异常范围；账号、云同步与后端登记为 B-12 待评估，现阶段保持本地优先且不开发；Task 5.3 标记为待视觉确认；同期提交浅色工作台 UI/UX 重构，`npm test` 72/72、`npm run build` 成功。
+
+![](screenshots/2026-11-15-roadmap-v1-6-sites-deploy-01.png)

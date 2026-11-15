@@ -20,6 +20,9 @@ interface SidebarProps {
   onLoadCourse: (courseId: SampleCourseId) => void;
   noteSource: NoteSourceSummary;
   onImportConfirm: (course: ImportedCourse) => void;
+  importPreviewOpen: boolean;
+  onOpenImportPreview: () => void;
+  onCloseImportPreview: () => void;
 }
 
 export function Sidebar({
@@ -32,8 +35,10 @@ export function Sidebar({
   onLoadCourse,
   noteSource,
   onImportConfirm,
+  importPreviewOpen,
+  onOpenImportPreview,
+  onCloseImportPreview,
 }: SidebarProps) {
-  const [isImportPreviewOpen, setIsImportPreviewOpen] = useState(false);
   const [isSamplePickerOpen, setIsSamplePickerOpen] = useState(false);
 
   const closeSamplePicker = useCallback(() => setIsSamplePickerOpen(false), []);
@@ -46,13 +51,12 @@ export function Sidebar({
     [onLoadCourse],
   );
 
-  const closeImportPreview = useCallback(() => setIsImportPreviewOpen(false), []);
   const handleImportConfirm = useCallback(
     (course: ImportedCourse) => {
-      setIsImportPreviewOpen(false);
+      onCloseImportPreview();
       onImportConfirm(course);
     },
-    [onImportConfirm],
+    [onCloseImportPreview, onImportConfirm],
   );
 
   return (
@@ -125,7 +129,7 @@ export function Sidebar({
           <button
             type="button"
             className="button button--import"
-            onClick={() => setIsImportPreviewOpen(true)}
+            onClick={onOpenImportPreview}
             aria-haspopup="dialog"
             title="导入 Markdown / TXT 笔记"
           >
@@ -213,10 +217,10 @@ export function Sidebar({
       </section>
     </aside>
 
-    {isImportPreviewOpen && (
+    {importPreviewOpen && (
       <NoteImportPreview
         currentNodeCount={nodes.length}
-        onClose={closeImportPreview}
+        onClose={onCloseImportPreview}
         onConfirm={handleImportConfirm}
       />
     )}

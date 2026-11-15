@@ -155,18 +155,25 @@ function StarMapWorkspace() {
   const [plannedBudgetMinutes, setPlannedBudgetMinutes] = useState(
     sampleCourse.reviewWindowMinutes,
   );
+  const [isImportPreviewOpen, setIsImportPreviewOpen] = useState(false);
   const [routeAnimationEnabled, setRouteAnimationEnabled] = useState(
     () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   );
   const [routeAnimationRun, setRouteAnimationRun] = useState(0);
   const [toast, setToast] = useState<ToastState | null>(null);
   const toastCounter = useRef(0);
-  const { fitView, getNodes } = useReactFlow<KnowledgeFlowNode, GraphFlowEdge>();
+  const { fitView, getNodes, getZoom, setCenter } = useReactFlow<
+    KnowledgeFlowNode,
+    GraphFlowEdge
+  >();
 
   const notify = useCallback((message: string) => {
     toastCounter.current += 1;
     setToast({ id: toastCounter.current, message });
   }, []);
+
+  const openImportPreview = useCallback(() => setIsImportPreviewOpen(true), []);
+  const closeImportPreview = useCallback(() => setIsImportPreviewOpen(false), []);
 
   useEffect(() => {
     if (!toast) return;
@@ -416,6 +423,30 @@ function StarMapWorkspace() {
     setRouteAnimationRun((run) => run + 1);
   }, []);
 
+  const handleLocateNode = useCallback(
+    (nodeId: string) => {
+      const targetNode = getNodes().find((node) => node.id === nodeId);
+      if (!targetNode) return;
+
+      handleSelectNode(nodeId);
+
+      const width = targetNode.measured?.width ?? 120;
+      const height = targetNode.measured?.height ?? 90;
+      const zoom = Math.max(getZoom(), 1.15);
+      // 桌面理由抽屉覆盖右侧 480px，右移节点中心让它在剩余画布中居中。
+      const drawerOffset =
+        window.matchMedia('(min-width: 841px)').matches ? 240 / zoom : 0;
+
+      setCenter(
+        targetNode.position.x + width / 2 + drawerOffset,
+        targetNode.position.y + height / 2,
+        { zoom, duration: 480 },
+      );
+      notify(`已定位「${targetNode.data.title}」`);
+    },
+    [getNodes, getZoom, handleSelectNode, notify, setCenter],
+  );
+
   // 编辑预览只更新 nodes，不重建边；边仅依赖课程数据、选中态与航线动画。
   const edges = useMemo(
     () => [
@@ -462,6 +493,9 @@ function StarMapWorkspace() {
           onLoadCourse={handleLoadCourse}
           noteSource={noteSource}
           onImportConfirm={handleImportConfirm}
+          importPreviewOpen={isImportPreviewOpen}
+          onOpenImportPreview={openImportPreview}
+          onCloseImportPreview={closeImportPreview}
         />
         <KnowledgeGraph
           nodes={nodes}
@@ -470,6 +504,8 @@ function StarMapWorkspace() {
           onSelectNode={handleSelectNode}
           onNodeDragStop={handleNodeDragStop}
           onResetLayout={handleResetLayout}
+          onOpenImport={openImportPreview}
+          onLoadSample={handleLoadSample}
         />
         <DetailPanel
           node={selectedNode}
@@ -489,6 +525,12 @@ function StarMapWorkspace() {
           onAnimationChange={setRouteAnimationEnabled}
           onGenerateRoute={handleGenerateRoute}
           routeNodeCount={routePlan.selectedIds.length}
+          decisions={routePlan.decisions}
+          routeSelectedIds={routePlan.selectedIds}
+          totalBenefit={routePlan.totalBenefit}
+          onLocateNode={handleLocateNode}
+          onOpenImport={openImportPreview}
+          onLoadSample={handleLoadSample}
         />
       </main>
 

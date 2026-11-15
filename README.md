@@ -217,7 +217,7 @@ star-map-backpack/
 1. Sprint 2：Markdown/TXT 解析、知识点映射、笔记导入与计算机组成原理示例课程（已完成）
 2. Sprint 3：节点编辑面板、分值与掌握度更新（Task 3.1、Task 3.2 已完成）
 3. Sprint 4：`src/algorithms/` 独立 0-1 背包算法与测试（Task 4.1–Task 4.3 已完成）
-4. Sprint 5：算法与星图联动、时间滑块（Task 5.1 已完成）、航线动画（Task 5.2 已完成）、选择理由展示（Task 5.3 已完成）、空状态与错误状态（Task 5.4 已完成）
-5. Sprint 6：学习记录、状态更新、分享海报
+4. Sprint 5：算法与星图联动、时间滑块（Task 5.1 已完成）、航线动画（Task 5.2 已完成）、选择理由展示（Task 5.3 已完成）、空状态与错误状态（Task 5.4 已完成）、Sprint 复盘（Task 5.99 已完成）
+5. Sprint 6：空白星图与工作区持久化（Task 6.1-fix）、顶栏时间同步（Task 6.2-fix）、学习记录、状态更新、分享海报
 6. Sprint 7：异常处理、最终 UI 打磨与 Qoder Sites 部署（AI 暂缓，待产品评估）
 

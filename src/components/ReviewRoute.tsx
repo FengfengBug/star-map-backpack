@@ -1,7 +1,8 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ChevronDown, Compass, Flag, Play, Route, Sparkles } from 'lucide-react';
 import type { KnapsackDecision } from '../algorithms/knapsack';
 import type { KnowledgeFlowNode } from '../types/knowledge';
+import type { PlanChange } from '../utils/planChange';
 import { formatDuration, formatReviewWindow } from '../utils/star';
 import { sumPendingMinutes } from '../utils/knowledgeGraph';
 import {
@@ -9,6 +10,7 @@ import {
   isPendingDecision,
   type RouteEmptyStateKind,
 } from '../utils/routeEmptyState';
+import { PlanChangeNotice } from './PlanChangeNotice';
 import { RouteReasonSheet } from './RouteReasonSheet';
 import './ReviewRoute.css';
 
@@ -27,6 +29,9 @@ interface ReviewRouteProps {
   decisions: KnapsackDecision[];
   routeSelectedIds: string[];
   totalBenefit: number;
+  planChange: PlanChange | null;
+  onUndoPlanChange: () => void;
+  onDismissPlanChange: () => void;
   onLocateNode: (nodeId: string) => void;
   onOpenImport: () => void;
   onLoadSample: () => void;
@@ -84,12 +89,19 @@ export function ReviewRoute({
   decisions,
   routeSelectedIds,
   totalBenefit,
+  planChange,
+  onUndoPlanChange,
+  onDismissPlanChange,
   onLocateNode,
   onOpenImport,
   onLoadSample,
 }: ReviewRouteProps) {
   const [reasonsOpen, setReasonsOpen] = useState(false);
   const closeReasons = useCallback(() => setReasonsOpen(false), []);
+
+  useEffect(() => {
+    if (planChange) setReasonsOpen(false);
+  }, [planChange]);
   const pendingNodes = nodes.filter((node) => !node.data.reviewed);
   const pendingMinutes = sumPendingMinutes(nodes);
   const selectedCount = decisions.filter((decision) => decision.selected).length;
@@ -459,6 +471,16 @@ export function ReviewRoute({
           </p>
         </div>
       </section>
+
+      {planChange && !reasonsOpen && (
+        <div className="plan-change-anchor">
+          <PlanChangeNotice
+            change={planChange}
+            onUndo={onUndoPlanChange}
+            onDismiss={onDismissPlanChange}
+          />
+        </div>
+      )}
 
       {reasonsOpen && decisions.length > 0 && (
         <RouteReasonSheet

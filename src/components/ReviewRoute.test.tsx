@@ -17,6 +17,9 @@ function renderEmptyRoute() {
       decisions={[]}
       routeSelectedIds={[]}
       totalBenefit={0}
+      planChange={null}
+      onUndoPlanChange={noop}
+      onDismissPlanChange={noop}
       onLocateNode={noop}
       onOpenImport={noop}
       onLoadSample={noop}

@@ -6,7 +6,7 @@ import {
   type OnNodeDrag,
   type OnNodesChange,
 } from '@xyflow/react';
-import { planReviewRoute } from './algorithms/knapsack';
+import { planReviewRoute, type KnapsackResult } from './algorithms/knapsack';
 import { ClearWorkspaceDialog } from './components/ClearWorkspaceDialog';
 import { DetailPanel } from './components/DetailPanel';
 import { Header } from './components/Header';
@@ -38,6 +38,12 @@ import {
   createKnowledgeEdges,
   createKnowledgeNodes,
 } from './utils/knowledgeGraph';
+import {
+  createPlanChange,
+  getRoutePlanKey,
+  type PlanChange,
+  type PlanChangeCause,
+} from './utils/planChange';
 import {
   createReviewRouteEdges,
   createReviewRouteItems,
@@ -88,6 +94,16 @@ interface UndoState {
   snapshot: WorkspaceSnapshot;
   message: string;
   detail: string;
+}
+
+interface PlanChangeState {
+  change: PlanChange;
+  routeKey: string;
+}
+
+interface RouteUndoState {
+  plan: KnapsackResult;
+  routeKey: string;
 }
 
 interface InitialWorkspaceState {
@@ -367,6 +383,8 @@ function StarMapWorkspace() {
     () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   );
   const [routeAnimationRun, setRouteAnimationRun] = useState(0);
+  const [planChangeState, setPlanChangeState] = useState<PlanChangeState | null>(null);
+  const [routeUndoState, setRouteUndoState] = useState<RouteUndoState | null>(null);
   const [toast, setToast] = useState<ToastState | null>(null);
   const [clearIntent, setClearIntent] = useState<ClearIntent | null>(null);
   const [undoState, setUndoState] = useState<UndoState | null>(null);
@@ -527,15 +545,73 @@ function StarMapWorkspace() {
     return () => window.clearTimeout(timer);
   }, [budgetMinutes, plannedBudgetMinutes]);
 
-  const routePlan = useMemo(
+  const automaticRoutePlan = useMemo(
     () => planReviewRoute(createReviewRouteItems(coursePoints), plannedBudgetMinutes),
     [coursePoints, plannedBudgetMinutes],
   );
+  const routePlanKey = useMemo(
+    () => getRoutePlanKey(coursePoints, plannedBudgetMinutes),
+    [coursePoints, plannedBudgetMinutes],
+  );
+  const planChange =
+    planChangeState?.routeKey === routePlanKey ? planChangeState.change : null;
+  const routePlan =
+    routeUndoState?.routeKey === routePlanKey
+      ? routeUndoState.plan
+      : automaticRoutePlan;
   const routeStates = useMemo(() => createRouteStateMap(routePlan), [routePlan]);
 
   useEffect(() => {
     setNodes((currentNodes) => applyRouteStates(currentNodes, routeStates));
   }, [routeStates, setNodes]);
+
+  const preparePlanChange = useCallback(
+    (nextPoints: KnowledgePoint[], cause: PlanChangeCause) => {
+      const nextPlan = planReviewRoute(
+        createReviewRouteItems(nextPoints),
+        plannedBudgetMinutes,
+      );
+      const change = createPlanChange({
+        cause,
+        previousPlan: routePlan,
+        nextPlan,
+        points: nextPoints,
+      });
+
+      setRouteUndoState(null);
+      setPlanChangeState(
+        change
+          ? {
+              change,
+              routeKey: getRoutePlanKey(nextPoints, plannedBudgetMinutes),
+            }
+          : null,
+      );
+    },
+    [plannedBudgetMinutes, routePlan],
+  );
+
+  const handleBudgetChange = useCallback((minutes: number) => {
+    setPlanChangeState(null);
+    setRouteUndoState(null);
+    setBudgetMinutes(minutes);
+  }, []);
+
+  const handleDismissPlanChange = useCallback(() => {
+    setPlanChangeState(null);
+  }, []);
+
+  const handleUndoPlanChange = useCallback(() => {
+    if (!planChangeState || planChangeState.routeKey !== routePlanKey) return;
+
+    setRouteUndoState({
+      plan: planChangeState.change.previousPlan,
+      routeKey: planChangeState.routeKey,
+    });
+    setPlanChangeState(null);
+    setRouteAnimationRun((run) => run + 1);
+    notify('已恢复上一版航线，节点参数与复习状态保持不变');
+  }, [notify, planChangeState, routePlanKey]);
 
   const fitMapToCanvas = useCallback(() => {
     window.requestAnimationFrame(() => {
@@ -575,6 +651,8 @@ function StarMapWorkspace() {
 
   const applyWorkspaceSnapshot = useCallback(
     (snapshot: WorkspaceSnapshot, selection: string | null) => {
+      setPlanChangeState(null);
+      setRouteUndoState(null);
       setWorkspaceId(snapshot.id);
       setWorkspaceKind(snapshot.kind);
       setCoursePoints(snapshot.points);
@@ -641,16 +719,42 @@ function StarMapWorkspace() {
 
   const handleSaveNode = useCallback(
     (nodeId: string, fields: KnowledgePointEditableFields) => {
-      setCoursePoints((currentPoints) =>
-        currentPoints.map((point) =>
-          point.id === nodeId ? { ...point, ...fields } : point,
-        ),
+      const point = coursePoints.find((candidate) => candidate.id === nodeId);
+      if (!point) return;
+
+      const nextPoints = coursePoints.map((candidate) =>
+        candidate.id === nodeId ? { ...candidate, ...fields } : candidate,
       );
+      setCoursePoints(nextPoints);
       setNodes((currentNodes) =>
         currentNodes.map((node) =>
           node.id === nodeId ? applyNodeFields(node, fields) : node,
         ),
       );
+
+      const masteryChanged = point.mastery !== fields.mastery;
+      const parametersChanged =
+        point.scoreShare !== fields.scoreShare ||
+        point.estimatedMinutes !== fields.estimatedMinutes;
+
+      if (masteryChanged || parametersChanged) {
+        preparePlanChange(
+          nextPoints,
+          masteryChanged
+            ? {
+                kind: 'mastery',
+                nodeId,
+                title: fields.title,
+                previousMastery: point.mastery,
+                nextMastery: fields.mastery,
+              }
+            : {
+                kind: 'parameters',
+                nodeId,
+                title: fields.title,
+              },
+        );
+      }
 
       notify(
         persistEnabledRef.current
@@ -658,7 +762,7 @@ function StarMapWorkspace() {
           : `已更新「${fields.title}」，当前修改仅保留在本次会话`,
       );
     },
-    [notify, setNodes],
+    [coursePoints, notify, preparePlanChange, setNodes],
   );
 
   const handleToggleReviewed = useCallback(
@@ -666,11 +770,16 @@ function StarMapWorkspace() {
       const point = coursePoints.find((candidate) => candidate.id === nodeId);
       if (!point) return;
 
-      setCoursePoints((currentPoints) =>
-        currentPoints.map((candidate) =>
-          candidate.id === nodeId ? { ...candidate, reviewed } : candidate,
-        ),
+      const nextPoints = coursePoints.map((candidate) =>
+        candidate.id === nodeId ? { ...candidate, reviewed } : candidate,
       );
+      setCoursePoints(nextPoints);
+      preparePlanChange(nextPoints, {
+        kind: 'reviewed',
+        nodeId,
+        title: point.title,
+        reviewed,
+      });
       setNodes((currentNodes) =>
         currentNodes.map((node) =>
           node.id === nodeId ? applyNodeReviewed(node, reviewed) : node,
@@ -686,7 +795,7 @@ function StarMapWorkspace() {
           : `已撤销「${point.title}」的已复习标记${persistSuffix}`,
       );
     },
-    [coursePoints, notify, setNodes],
+    [coursePoints, notify, preparePlanChange, setNodes],
   );
 
   const handlePreviewNode = useCallback(
@@ -725,10 +834,7 @@ function StarMapWorkspace() {
     setNodePositions(positions);
     setNodes(
       withSelection(
-        applyRouteStates(
-          createKnowledgeNodes(coursePoints),
-          createRouteStates(coursePoints, plannedBudgetMinutes),
-        ),
+        applyRouteStates(createKnowledgeNodes(coursePoints), routeStates),
         selectedNodeId,
       ),
     );
@@ -740,7 +846,7 @@ function StarMapWorkspace() {
     fitMapToCanvas,
     notify,
     persistCurrentWorkspace,
-    plannedBudgetMinutes,
+    routeStates,
     selectedNodeId,
     setNodes,
   ]);
@@ -1075,7 +1181,7 @@ function StarMapWorkspace() {
         <ReviewRoute
           nodes={nodes}
           budgetMinutes={budgetMinutes}
-          onBudgetChange={setBudgetMinutes}
+          onBudgetChange={handleBudgetChange}
           animationEnabled={routeAnimationEnabled}
           onAnimationChange={setRouteAnimationEnabled}
           onGenerateRoute={handleGenerateRoute}
@@ -1083,6 +1189,9 @@ function StarMapWorkspace() {
           decisions={routePlan.decisions}
           routeSelectedIds={routePlan.selectedIds}
           totalBenefit={routePlan.totalBenefit}
+          planChange={planChange}
+          onUndoPlanChange={handleUndoPlanChange}
+          onDismissPlanChange={handleDismissPlanChange}
           onLocateNode={handleLocateNode}
           onOpenImport={openImportPreview}
           onLoadSample={handleLoadSample}

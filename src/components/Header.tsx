@@ -3,13 +3,21 @@ import { formatReviewWindow } from '../utils/star';
 import { StarGlyph } from './StarGlyph';
 import './Header.css';
 
+type CourseTag = '示例' | '导入' | '空白';
+
 interface HeaderProps {
   courseTitle: string;
-  courseTag: '示例' | '导入';
-  reviewWindowMinutes: number;
+  courseTag: CourseTag;
+  budgetMinutes: number;
 }
 
-export function Header({ courseTitle, courseTag, reviewWindowMinutes }: HeaderProps) {
+const COURSE_TAG_CLASS: Record<CourseTag, string> = {
+  示例: 'demo-tag',
+  导入: 'demo-tag demo-tag--imported',
+  空白: 'demo-tag demo-tag--blank',
+};
+
+export function Header({ courseTitle, courseTag, budgetMinutes }: HeaderProps) {
   return (
     <header className="topbar">
       <div className="brand" aria-label="星图背包">
@@ -28,11 +36,7 @@ export function Header({ courseTitle, courseTag, reviewWindowMinutes }: HeaderPr
         <span className="context-label">当前课程</span>
         <span className="course-summary__row">
           <span className="course-summary__title">{courseTitle}</span>
-          <span
-            className={courseTag === '示例' ? 'demo-tag' : 'demo-tag demo-tag--imported'}
-          >
-            {courseTag}
-          </span>
+          <span className={COURSE_TAG_CLASS[courseTag]}>{courseTag}</span>
         </span>
       </div>
 
@@ -43,8 +47,8 @@ export function Header({ courseTitle, courseTag, reviewWindowMinutes }: HeaderPr
           <Clock3 size={16} strokeWidth={1.8} />
         </span>
         <span className="review-clock__copy">
-          <span className="context-label">剩余复习时间</span>
-          <strong>{formatReviewWindow(reviewWindowMinutes)}</strong>
+          <span className="context-label">本轮时间预算</span>
+          <strong>{formatReviewWindow(budgetMinutes)}</strong>
         </span>
       </div>
 

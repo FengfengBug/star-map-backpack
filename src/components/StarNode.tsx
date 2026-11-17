@@ -74,10 +74,16 @@ function StarNodeComponent({ data, selected, dragging }: NodeProps<KnowledgeFlow
 
       <span
         className="star-node__label"
-        title={`${data.title} · 分值占比 ${formatScoreShare(data.scoreShare)} · 掌握度 ${formatMastery(data.mastery)}`}
+        title={`${data.title} · 分值占比 ${formatScoreShare(data.scoreShare)} · 掌握度 ${formatMastery(data.mastery)}${data.reviewed ? ' · 已复习' : ''}`}
       >
         <span className="star-node__title">{data.title}</span>
-        {data.reviewed && <span className="star-node__reviewed-dot" aria-hidden="true" />}
+        {data.reviewed && (
+          <span className="star-node__reviewed-mark" aria-hidden="true">
+            <svg viewBox="0 0 12 12" focusable="false">
+              <path d="M3 6.2 5 8.2 9 4" />
+            </svg>
+          </span>
+        )}
         {data.routeState === 'selected' && (
           <span className="star-node__route-dot" aria-hidden="true" />
         )}

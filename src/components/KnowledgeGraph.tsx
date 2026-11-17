@@ -25,6 +25,8 @@ interface KnowledgeGraphProps {
   onResetLayout: () => void;
   onOpenImport: () => void;
   onLoadSample: () => void;
+  lastBackupLabel?: string | null;
+  onRestoreBackup?: () => void;
 }
 
 export function KnowledgeGraph({
@@ -36,6 +38,8 @@ export function KnowledgeGraph({
   onResetLayout,
   onOpenImport,
   onLoadSample,
+  lastBackupLabel,
+  onRestoreBackup,
 }: KnowledgeGraphProps) {
   const relationCount = edges.filter((edge) => edge.type === 'constellation').length;
 
@@ -135,7 +139,9 @@ export function KnowledgeGraph({
             </span>
             <span className="eyebrow">空星图</span>
             <h3>还没有知识点</h3>
-            <p>导入 Markdown 或 TXT 笔记，或载入一套示例课程，开始构建复习星图。</p>
+            <p>
+              导入 Markdown 或 TXT 笔记，或载入一套示例课程，开始构建复习星图。数据仅保存在本机浏览器，不会上传。
+            </p>
             <div className="graph-empty__actions">
               <button
                 type="button"
@@ -151,7 +157,22 @@ export function KnowledgeGraph({
               >
                 载入示例
               </button>
+              {onRestoreBackup && (
+                <button
+                  type="button"
+                  className="graph-empty__action graph-empty__action--restore"
+                  onClick={onRestoreBackup}
+                >
+                  <RotateCcw size={12} strokeWidth={1.9} aria-hidden="true" />
+                  恢复上次清空
+                </button>
+              )}
             </div>
+            {lastBackupLabel && (
+              <p className="graph-empty__backup">
+                最近清空：{lastBackupLabel} · 本机可恢复
+              </p>
+            )}
           </div>
         )}
       </div>

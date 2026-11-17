@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { ArrowUpRight, Check, Info, MapPin, Pencil, X } from 'lucide-react';
+import {
+  ArrowUpRight,
+  Check,
+  Info,
+  MapPin,
+  Pencil,
+  RotateCcw,
+  SlidersHorizontal,
+  X,
+} from 'lucide-react';
 import type {
   ChapterDefinition,
   KnowledgeFlowNode,
@@ -19,6 +28,7 @@ interface DetailPanelProps {
   onSelectNode: (nodeId: string) => void;
   onClearSelection: () => void;
   onSaveNode: (nodeId: string, fields: KnowledgePointEditableFields) => void;
+  onToggleReviewed: (nodeId: string, reviewed: boolean) => void;
   onPreviewNode: (
     nodeId: string,
     parameters: KnowledgePointParameterFields | null,
@@ -246,7 +256,7 @@ function NodeEditorForm({
 
       <p className="editor-persist-note">
         <Info size={12} strokeWidth={1.9} aria-hidden="true" />
-        修改会同步到星图并保存在本机；导入笔记的修改仅本次会话有效。
+        修改会同步到星图，并保存在本机浏览器。
       </p>
 
       <div className="editor-actions">
@@ -270,10 +280,13 @@ export function DetailPanel({
   onSelectNode,
   onClearSelection,
   onSaveNode,
+  onToggleReviewed,
   onPreviewNode,
 }: DetailPanelProps) {
   const [editorDraft, setEditorDraft] = useState<EditorDraft | null>(null);
   const [editorErrors, setEditorErrors] = useState<EditorErrors>({});
+  const [masteryDraft, setMasteryDraft] = useState<string | null>(null);
+  const [masteryError, setMasteryError] = useState<string | undefined>(undefined);
   const previewingNodeIdRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -287,14 +300,19 @@ export function DetailPanel({
 
     setEditorDraft(null);
     setEditorErrors({});
+    setMasteryDraft(null);
+    setMasteryError(undefined);
   }, [node?.id, onPreviewNode]);
 
   const isEditing = editorDraft !== null;
+  const isMasteryEditing = masteryDraft !== null;
 
   const handleStartEdit = () => {
     if (!node) return;
     setEditorDraft(createEditorDraft(node));
     setEditorErrors({});
+    setMasteryDraft(null);
+    setMasteryError(undefined);
   };
 
   const handleCancelEdit = () => {
@@ -342,6 +360,37 @@ export function DetailPanel({
     previewingNodeIdRef.current = null;
     setEditorDraft(null);
     setEditorErrors({});
+  };
+
+  const handleStartMasteryEdit = () => {
+    if (!node) return;
+    setMasteryDraft(node.data.mastery === null ? '' : String(node.data.mastery));
+    setMasteryError(undefined);
+  };
+
+  const handleCancelMasteryEdit = () => {
+    setMasteryDraft(null);
+    setMasteryError(undefined);
+  };
+
+  const handleSaveMastery = () => {
+    if (!node || masteryDraft === null) return;
+
+    const nextError = validateNumberField(masteryDraft, 0, 100, '掌握度');
+    if (nextError) {
+      setMasteryError(nextError);
+      return;
+    }
+
+    onSaveNode(node.id, {
+      title: node.data.title,
+      content: node.data.content,
+      scoreShare: node.data.scoreShare,
+      estimatedMinutes: node.data.estimatedMinutes,
+      mastery: parseOptionalInteger(masteryDraft),
+    });
+    setMasteryDraft(null);
+    setMasteryError(undefined);
   };
 
   if (!node) {
@@ -487,6 +536,18 @@ export function DetailPanel({
                 {node.data.mastery}%<small>{masteryLabel}</small>
               </strong>
             )}
+            {!isMasteryEditing && (
+              <button
+                type="button"
+                className="mastery-adjust-button"
+                onClick={handleStartMasteryEdit}
+                aria-expanded={false}
+                aria-controls="quick-mastery-editor"
+              >
+                <SlidersHorizontal size={9} strokeWidth={1.8} aria-hidden="true" />
+                调整
+              </button>
+            )}
           </div>
           {hasPendingMastery ? (
             <div className="mastery-bar mastery-bar--pending" aria-hidden="true" />
@@ -507,6 +568,84 @@ export function DetailPanel({
               ? '导入的知识点尚未设置掌握度；点击右侧“编辑”补充后，星体亮度才会反映掌握程度。'
               : '星体亮度映射掌握程度，掌握越充分，星光越明亮。'}
           </p>
+
+          {masteryDraft !== null && (
+            <div className="mastery-quick-edit" id="quick-mastery-editor">
+              <RangeNumberField
+                id="quick-mastery"
+                label="快速调整掌握度"
+                value={masteryDraft}
+                min={0}
+                max={100}
+                suffix="%"
+                hint="0–100，保存后更新星体亮度"
+                error={masteryError}
+                onChange={(value) => {
+                  setMasteryDraft(value);
+                  setMasteryError(undefined);
+                }}
+              />
+              <div className="mastery-quick-actions">
+                <p>修改后需手动保存，不会自动写入。</p>
+                <button
+                  type="button"
+                  className="mastery-quick-button mastery-quick-button--quiet"
+                  onClick={handleCancelMasteryEdit}
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  className="mastery-quick-button mastery-quick-button--primary"
+                  onClick={handleSaveMastery}
+                >
+                  保存掌握度
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+
+        <section
+          className={`review-card ${node.data.reviewed ? 'is-reviewed' : ''}`}
+          aria-labelledby="review-action-heading"
+        >
+          <div className="review-card__head">
+            <div className="review-card__copy">
+              <span className="eyebrow">本轮复习</span>
+              <h3 id="review-action-heading" className="review-card__title">
+                {node.data.reviewed ? '已在复习记录中' : '完成这颗知识星'}
+              </h3>
+            </div>
+            <span
+              className={`review-status ${node.data.reviewed ? 'is-reviewed' : 'is-pending'}`}
+            >
+              <span aria-hidden="true" />
+              {node.data.reviewed ? '已复习' : '待复习'}
+            </span>
+          </div>
+          <p className="review-card__hint">
+            {node.data.reviewed
+              ? '这颗星已从本轮航线中排除，可随时撤销。'
+              : '标记后会从本轮航线中排除，并保存到本机。'}
+            掌握度
+            {node.data.mastery === null
+              ? '保持待设置'
+              : `保持 ${node.data.mastery}%`}
+            ，不会被自动修改。
+          </p>
+          <button
+            type="button"
+            className={`review-card__action ${node.data.reviewed ? 'is-reviewed' : ''}`}
+            onClick={() => onToggleReviewed(node.id, !node.data.reviewed)}
+          >
+            {node.data.reviewed ? (
+              <RotateCcw size={12} strokeWidth={2} aria-hidden="true" />
+            ) : (
+              <Check size={12} strokeWidth={2.2} aria-hidden="true" />
+            )}
+            {node.data.reviewed ? '撤销已复习' : '标记为已复习'}
+          </button>
         </section>
 
         <section className="relations" aria-labelledby="relations-heading">

@@ -1,0 +1,104 @@
+.workspace-actions-group {
+  margin-top: 7px;
+}
+
+.workspace-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+
+.workspace-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.56);
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.015em;
+  line-height: 1;
+  transition:
+    border-color 180ms var(--ease-damped),
+    background-color 180ms var(--ease-damped),
+    color 180ms var(--ease-damped),
+    transform 320ms var(--ease-damped);
+}
+
+.workspace-action:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-soft);
+}
+
+.workspace-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.workspace-action--danger {
+  border-color: rgba(180, 79, 89, 0.14);
+  background: rgba(180, 79, 89, 0.03);
+  color: var(--error);
+}
+
+.workspace-action--danger:hover:not(:disabled) {
+  border-color: rgba(180, 79, 89, 0.3);
+  background: rgba(180, 79, 89, 0.075);
+  color: #9d3d48;
+}
+
+.workspace-action:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.workspace-actions__foot {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.workspace-actions__hint {
+  margin: 0;
+  color: var(--muted-2);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.workspace-actions__manage {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  min-height: 20px;
+  padding: 0 2px;
+  color: var(--muted-2);
+  font-size: 9px;
+  line-height: 1.5;
+  text-decoration: underline;
+  text-decoration-color: rgba(92, 104, 117, 0.24);
+  text-underline-offset: 2px;
+  transition: color 180ms var(--ease-damped);
+}
+
+.workspace-actions__manage:hover {
+  color: var(--text-soft);
+}
+
+@media (max-width: 840px) {
+  .workspace-action {
+    min-height: 44px;
+  }
+
+  .workspace-actions__manage {
+    min-height: 32px;
+    padding-inline: 4px;
+  }
+}

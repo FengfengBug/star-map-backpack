@@ -209,6 +209,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
 }
@@ -254,6 +255,27 @@
   border-color: #3e6597;
   background: #456d9f;
   color: #fff;
+}
+
+.graph-empty__action--restore {
+  border-style: dashed;
+  border-color: rgba(82, 120, 173, 0.2);
+  background: rgba(82, 120, 173, 0.035);
+  color: #5c6f89;
+}
+
+.graph-empty__action--restore:hover {
+  border-color: rgba(82, 120, 173, 0.36);
+  background: rgba(82, 120, 173, 0.075);
+  color: #456d9f;
+}
+
+.graph-empty__backup {
+  max-width: 360px;
+  margin: 10px 0 0;
+  color: var(--muted-2);
+  font-size: 9.5px;
+  line-height: 1.55;
 }
 
 .graph-canvas .react-flow {

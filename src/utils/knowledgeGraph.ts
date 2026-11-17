@@ -10,7 +10,7 @@ export function createKnowledgeNodes(
     id: point.id,
     type: 'knowledge',
     position: savedPositions[point.id] ?? point.position,
-    ariaLabel: `知识点：${point.title}，分值占比 ${formatScoreShare(point.scoreShare)}，掌握度 ${formatMastery(point.mastery)}`,
+    ariaLabel: `知识点：${point.title}，分值占比 ${formatScoreShare(point.scoreShare)}，掌握度 ${formatMastery(point.mastery)}${point.reviewed ? '，已复习' : ''}`,
     ariaRole: 'button',
     focusable: true,
     data: {

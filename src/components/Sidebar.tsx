@@ -1,13 +1,22 @@
 import { useCallback, useState } from 'react';
-import { BookOpen, Check, FileText, RefreshCw, Upload } from 'lucide-react';
+import {
+  AlertTriangle,
+  BookOpen,
+  Check,
+  FileText,
+  RefreshCw,
+  Upload,
+} from 'lucide-react';
 import type { SampleCourseId } from '../data/sampleCourses';
 import type { ImportedCourse } from '../parsers/importedNote';
 import type { ChapterDefinition, KnowledgeFlowNode } from '../types/knowledge';
 import type { NoteSourceSummary } from '../types/noteSource';
 import { formatMastery, formatScoreShare } from '../utils/star';
+import type { ImportMode } from './ImportModePicker';
 import { NoteImportPreview } from './NoteImportPreview';
 import { SampleCoursePicker } from './SampleCoursePicker';
 import { StarGlyph } from './StarGlyph';
+import { WorkspaceActions } from './WorkspaceActions';
 import './Sidebar.css';
 
 interface SidebarProps {
@@ -19,11 +28,27 @@ interface SidebarProps {
   onLoadSample: () => void;
   onLoadCourse: (courseId: SampleCourseId) => void;
   noteSource: NoteSourceSummary;
-  onImportConfirm: (course: ImportedCourse) => void;
+  onImportConfirm: (course: ImportedCourse, mode: ImportMode) => void;
   importPreviewOpen: boolean;
   onOpenImportPreview: () => void;
   onCloseImportPreview: () => void;
+  onCreateBlank: () => void;
+  onClearWorkspace: () => void;
+  onManageLocalData: () => void;
+  storageIssue: string | null;
 }
+
+const NOTE_TAG_CLASS: Record<NoteSourceSummary['kind'], string> = {
+  sample: 'demo-tag',
+  imported: 'demo-tag demo-tag--imported',
+  blank: 'demo-tag demo-tag--blank',
+};
+
+const NOTE_TAG_LABEL: Record<NoteSourceSummary['kind'], string> = {
+  sample: '示例',
+  imported: '导入',
+  blank: '空白',
+};
 
 export function Sidebar({
   chapters,
@@ -38,6 +63,10 @@ export function Sidebar({
   importPreviewOpen,
   onOpenImportPreview,
   onCloseImportPreview,
+  onCreateBlank,
+  onClearWorkspace,
+  onManageLocalData,
+  storageIssue,
 }: SidebarProps) {
   const [isSamplePickerOpen, setIsSamplePickerOpen] = useState(false);
 
@@ -52,9 +81,9 @@ export function Sidebar({
   );
 
   const handleImportConfirm = useCallback(
-    (course: ImportedCourse) => {
+    (course: ImportedCourse, mode: ImportMode) => {
       onCloseImportPreview();
-      onImportConfirm(course);
+      onImportConfirm(course, mode);
     },
     [onCloseImportPreview, onImportConfirm],
   );
@@ -68,15 +97,17 @@ export function Sidebar({
             <span className="eyebrow">资料来源</span>
             <h2 id="note-source-heading">复习笔记</h2>
           </div>
-          <button
-            type="button"
-            className="icon-button"
-            onClick={onLoadSample}
-            title="重新载入当前示例课程"
-            aria-label="重新载入当前示例课程"
-          >
-            <RefreshCw size={14} strokeWidth={1.9} />
-          </button>
+          {noteSource.kind === 'sample' && (
+            <button
+              type="button"
+              className="icon-button"
+              onClick={onLoadSample}
+              title="重新载入当前示例课程"
+              aria-label="重新载入当前示例课程"
+            >
+              <RefreshCw size={14} strokeWidth={1.9} />
+            </button>
+          )}
         </div>
 
         <div className="note-file">
@@ -88,12 +119,8 @@ export function Sidebar({
               <h3 title={noteSource.fileName}>{noteSource.fileName}</h3>
               <span>{noteSource.subtitle}</span>
             </div>
-            <span
-              className={
-                noteSource.kind === 'sample' ? 'demo-tag' : 'demo-tag demo-tag--imported'
-              }
-            >
-              {noteSource.kind === 'sample' ? '示例' : '导入'}
+            <span className={NOTE_TAG_CLASS[noteSource.kind]}>
+              {NOTE_TAG_LABEL[noteSource.kind]}
             </span>
           </div>
           <p className="note-file__excerpt">{noteSource.excerpt}</p>
@@ -105,7 +132,7 @@ export function Sidebar({
           <div className="note-file__footer">
             <span className="note-file__loaded">
               <Check size={11} strokeWidth={2.5} aria-hidden="true" />
-              已载入星图
+              {noteSource.kind === 'blank' ? '空白工作区' : '已载入星图'}
             </span>
             <span>
               {noteSource.characterCount.toLocaleString('zh-CN')} 字 · {nodes.length}{' '}
@@ -140,9 +167,26 @@ export function Sidebar({
         </div>
         <p className="note-source__hint">
           {noteSource.kind === 'sample'
-            ? '支持 Markdown / TXT 文件；导入将替换当前星图'
-            : '导入结果仅保存在本次会话，刷新后恢复示例笔记'}
+            ? '支持 Markdown / TXT 文件；导入时可选择替换或追加'
+            : noteSource.kind === 'imported'
+              ? '导入笔记已保存在本机，刷新页面后仍会恢复'
+              : '空白星图会保留在本机；导入笔记或载入示例开始构建'}
         </p>
+
+        <WorkspaceActions
+          onCreateBlank={onCreateBlank}
+          onClear={onClearWorkspace}
+          onManageLocalData={onManageLocalData}
+          createDisabled={nodes.length === 0}
+          clearDisabled={nodes.length === 0}
+        />
+
+        {storageIssue && (
+          <p className="sidebar-storage-issue" role="status">
+            <AlertTriangle size={12} strokeWidth={2} aria-hidden="true" />
+            {storageIssue}
+          </p>
+        )}
       </section>
 
       <div className="sidebar__rule" aria-hidden="true" />

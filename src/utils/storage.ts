@@ -146,6 +146,24 @@ export function saveNodeEdit(
   }
 }
 
+export function replaceNodeEdits(courseKey: string, edits: SavedCourseEdits) {
+  try {
+    const saved = readSavedNodeEdits();
+    if (Object.keys(edits).length > 0) {
+      saved[courseKey] = { ...edits };
+    } else {
+      delete saved[courseKey];
+    }
+    window.localStorage.setItem(NODE_EDITS_STORAGE_KEY, JSON.stringify(saved));
+  } catch {
+    // 忽略浏览器禁用 LocalStorage 的情况。
+  }
+}
+
+export function clearNodeEdits(courseKey: string) {
+  replaceNodeEdits(courseKey, {});
+}
+
 export function applySavedNodeEdits(
   points: KnowledgePoint[],
   edits: SavedCourseEdits,

@@ -140,13 +140,30 @@
   text-overflow: ellipsis;
 }
 
-.star-node__reviewed-dot {
-  width: 3.5px;
-  height: 3.5px;
+.star-node__reviewed-mark {
+  display: inline-grid;
+  width: 12px;
+  height: 12px;
   flex: 0 0 auto;
+  place-items: center;
   border-radius: 50%;
   background: var(--success);
-  box-shadow: 0 0 5px rgba(124, 226, 188, 0.35);
+  box-shadow: 0 0 0 2px rgba(67, 129, 106, 0.1);
+  color: #fff;
+}
+
+.star-node__reviewed-mark svg {
+  width: 8px;
+  height: 8px;
+  overflow: visible;
+}
+
+.star-node__reviewed-mark path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .star-node__route-dot {

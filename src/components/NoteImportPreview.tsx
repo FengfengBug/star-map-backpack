@@ -21,6 +21,7 @@ import {
   type NoteFileKind,
   type NoteSourceKind,
 } from '../parsers/importedNote';
+import { ImportModePicker, type ImportMode } from './ImportModePicker';
 import './NoteImportPreview.css';
 
 type ImportStep = 'preview' | 'confirm';
@@ -42,7 +43,7 @@ interface ImportStats {
 interface NoteImportPreviewProps {
   currentNodeCount: number;
   onClose: () => void;
-  onConfirm: (course: ImportedCourse) => void;
+  onConfirm: (course: ImportedCourse, mode: ImportMode) => void;
 }
 
 function getErrorMessage(error: unknown) {
@@ -79,6 +80,7 @@ export function NoteImportPreview({
   const [sourceKind, setSourceKind] = useState<NoteSourceKind>('paste');
   const [result, setResult] = useState<ImportedCourse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [importMode, setImportMode] = useState<ImportMode>('replace');
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -252,6 +254,8 @@ export function NoteImportPreview({
                 result={result}
                 stats={stats}
                 currentNodeCount={currentNodeCount}
+                mode={importMode}
+                onModeChange={setImportMode}
               />
             )
           )}
@@ -289,7 +293,11 @@ export function NoteImportPreview({
             <>
               <p className="import-modal__note">
                 <Info size={12} strokeWidth={2} aria-hidden="true" />
-                确认后替换当前星图，导入结果仅保存在本次会话
+                {currentNodeCount === 0
+                  ? '确认后创建新的导入工作区，结果仅保存在本机'
+                  : importMode === 'replace'
+                    ? '确认后替换当前星图，结果仅保存在本机，刷新后仍会恢复'
+                    : '确认后保留现有星图并追加新章节，结果仅保存在本机'}
               </p>
               <div className="import-modal__actions">
                 <button
@@ -304,11 +312,15 @@ export function NoteImportPreview({
                   type="button"
                   className="import-button import-button--primary"
                   onClick={() => {
-                    if (result) onConfirm(result);
+                    if (result) onConfirm(result, importMode);
                   }}
                 >
                   <Check size={14} strokeWidth={2.2} aria-hidden="true" />
-                  确认导入 {stats?.nodes ?? 0} 个知识点
+                  {currentNodeCount === 0
+                    ? `确认导入 ${stats?.nodes ?? 0} 个知识点`
+                    : importMode === 'replace'
+                      ? `确认替换并导入 ${stats?.nodes ?? 0} 个知识点`
+                      : `确认追加 ${stats?.nodes ?? 0} 个知识点`}
                 </button>
               </div>
             </>
@@ -444,7 +456,7 @@ function PreviewStep({
         <>
           <div className="import-preview__notice">
             <Sparkles size={13} strokeWidth={1.9} aria-hidden="true" />
-            解析已完成，以下结果尚未写入星图；进入下一步确认后才会替换当前知识星图。
+            解析已完成，以下结果尚未写入星图；进入下一步选择替换或追加，确认后才会写入。
           </div>
 
           <div className="import-preview__grid">
@@ -530,9 +542,19 @@ interface ConfirmStepProps {
   result: ImportedCourse;
   stats: ImportStats;
   currentNodeCount: number;
+  mode: ImportMode;
+  onModeChange: (mode: ImportMode) => void;
 }
 
-function ConfirmStep({ result, stats, currentNodeCount }: ConfirmStepProps) {
+function ConfirmStep({
+  result,
+  stats,
+  currentNodeCount,
+  mode,
+  onModeChange,
+}: ConfirmStepProps) {
+  const isReplace = currentNodeCount === 0 || mode === 'replace';
+
   return (
     <div className="import-confirm">
       <div className="import-confirm__hero">
@@ -540,11 +562,24 @@ function ConfirmStep({ result, stats, currentNodeCount }: ConfirmStepProps) {
           <Layers3 size={20} strokeWidth={1.8} />
         </span>
         <span className="import-confirm__eyebrow">准备导入</span>
-        <h3>确认导入 {stats.nodes} 个知识点？</h3>
+        <h3>
+          {currentNodeCount === 0
+            ? `导入 ${stats.nodes} 个知识点，创建新工作区？`
+            : isReplace
+              ? `用 ${stats.nodes} 个知识点替换当前星图？`
+              : `追加 ${stats.nodes} 个知识点到当前星图？`}
+        </h3>
         <p>
-          “{result.summary.fileName}”的解析结果将替换当前星图；确认前不会修改现有节点。
+          “{result.summary.fileName}”的解析结果尚未写入；确认前不会修改现有节点。
         </p>
       </div>
+
+      <ImportModePicker
+        currentCount={currentNodeCount}
+        importCount={stats.nodes}
+        mode={mode}
+        onChange={onModeChange}
+      />
 
       <div className="import-confirm__stats">
         <div>
@@ -561,7 +596,7 @@ function ConfirmStep({ result, stats, currentNodeCount }: ConfirmStepProps) {
         </div>
         <div>
           <strong>{currentNodeCount}</strong>
-          <span>当前节点将被替换</span>
+          <span>{isReplace ? '当前节点将被替换' : '当前知识点保留'}</span>
         </div>
       </div>
 
@@ -572,11 +607,24 @@ function ConfirmStep({ result, stats, currentNodeCount }: ConfirmStepProps) {
             将执行
           </h4>
           <ul>
-            <li>
-              用本次解析的 {stats.nodes} 个知识点替换当前星图中的 {currentNodeCount}{' '}
-              个知识点及其关联边
-            </li>
-            <li>清除当前选中状态与已保存的节点位置</li>
+            {isReplace ? (
+              <>
+                <li>
+                  {currentNodeCount === 0
+                    ? `创建包含 ${stats.nodes} 个知识点的新工作区`
+                    : `用本次解析的 ${stats.nodes} 个知识点替换当前星图中的 ${currentNodeCount} 个知识点及其关联边`}
+                </li>
+                <li>清除当前选中状态与已保存的节点位置</li>
+              </>
+            ) : (
+              <>
+                <li>
+                  保留当前 {currentNodeCount} 个知识点、参数与已保存坐标
+                </li>
+                <li>新增一个章节，写入本次解析的 {stats.nodes} 个知识点</li>
+                <li>为追加节点生成新的稳定 ID，不覆盖现有节点</li>
+              </>
+            )}
             <li>按标题层级生成 {stats.parentRelations} 条层级关系</li>
             <li>按同级相邻关系生成 {stats.relatedEdges} 条关联边</li>
           </ul>
@@ -590,7 +638,7 @@ function ConfirmStep({ result, stats, currentNodeCount }: ConfirmStepProps) {
           <ul>
             <li>分值占比、掌握度、预计复习时间不会自动生成</li>
             <li>导入后显示为“待设置”，在右侧详情面板点击“编辑”补充</li>
-            <li>导入结果仅保存在本次会话，刷新页面会恢复示例笔记</li>
+            <li>导入结果仅保存在本机浏览器，刷新页面后仍会恢复</li>
           </ul>
         </section>
       </div>

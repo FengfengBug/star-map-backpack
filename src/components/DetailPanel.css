@@ -497,6 +497,202 @@
   line-height: 1.5;
 }
 
+.mastery-card__head > span:first-child {
+  margin-right: auto;
+}
+
+.mastery-adjust-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 auto;
+  padding: 2px 5px;
+  border: 1px solid rgba(82, 120, 173, 0.14);
+  border-radius: 5px;
+  background: rgba(82, 120, 173, 0.045);
+  color: #456d9f;
+  font-size: 8.5px;
+  white-space: nowrap;
+  transition:
+    border-color 180ms var(--ease-damped),
+    background-color 180ms var(--ease-damped),
+    color 180ms var(--ease-damped);
+}
+
+.mastery-adjust-button:hover {
+  border-color: rgba(82, 120, 173, 0.28);
+  background: rgba(82, 120, 173, 0.09);
+  color: #345c8e;
+}
+
+.mastery-quick-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-strong);
+}
+
+.mastery-quick-edit .range-field {
+  gap: 4px;
+}
+
+.mastery-quick-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.mastery-quick-actions p {
+  flex: 1;
+  margin: 0;
+  color: var(--muted-2);
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.mastery-quick-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 25px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 9px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    border-color 180ms var(--ease-damped),
+    background-color 180ms var(--ease-damped),
+    color 180ms var(--ease-damped),
+    transform 320ms var(--ease-damped);
+}
+
+.mastery-quick-button--quiet {
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--muted);
+}
+
+.mastery-quick-button--quiet:hover {
+  border-color: var(--border-strong);
+  color: var(--text-soft);
+}
+
+.mastery-quick-button--primary {
+  border-color: #456d9f;
+  background: #5278ad;
+  color: #fff;
+}
+
+.mastery-quick-button--primary:hover {
+  border-color: #3e6597;
+  background: #456d9f;
+}
+
+.review-card {
+  position: relative;
+  overflow: hidden;
+  margin-top: 9px;
+  padding: 11px;
+  border: 1px solid rgba(67, 129, 106, 0.18);
+  border-radius: 11px;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(67, 129, 106, 0.12), transparent 55%),
+    rgba(249, 252, 250, 0.94);
+}
+
+.review-card::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(67, 129, 106, 0.7), rgba(67, 129, 106, 0.12));
+  content: '';
+}
+
+.review-card.is-reviewed {
+  border-color: rgba(67, 129, 106, 0.24);
+  background:
+    radial-gradient(circle at 90% 0%, rgba(67, 129, 106, 0.16), transparent 58%),
+    rgba(248, 252, 250, 0.96);
+}
+
+.review-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.review-card__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.review-card__title {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 560;
+  line-height: 1.4;
+}
+
+.review-card.is-reviewed .review-card__title {
+  color: #2f6652;
+}
+
+.review-card__hint {
+  margin: 7px 0 0;
+  color: var(--muted-2);
+  font-size: 8.5px;
+  line-height: 1.55;
+}
+
+.review-card__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 31px;
+  margin-top: 9px;
+  border: 1px solid rgba(67, 129, 106, 0.28);
+  border-radius: 8px;
+  background: rgba(67, 129, 106, 0.09);
+  color: #2f6652;
+  font-size: 10px;
+  font-weight: 560;
+  letter-spacing: 0.02em;
+  transition:
+    border-color 180ms var(--ease-damped),
+    background-color 180ms var(--ease-damped),
+    color 180ms var(--ease-damped),
+    transform 320ms var(--ease-damped);
+}
+
+.review-card__action:hover {
+  border-color: rgba(67, 129, 106, 0.42);
+  background: rgba(67, 129, 106, 0.14);
+}
+
+.review-card__action.is-reviewed {
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.76);
+  color: var(--muted);
+}
+
+.review-card__action.is-reviewed:hover {
+  border-color: var(--border-strong);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--text-soft);
+}
+
 .relations {
   margin-top: 15px;
 }

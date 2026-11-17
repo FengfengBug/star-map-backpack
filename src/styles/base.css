@@ -249,6 +249,12 @@ p {
   color: #80601e;
 }
 
+.demo-tag--blank {
+  border-color: rgba(92, 104, 117, 0.16);
+  background: rgba(92, 104, 117, 0.05);
+  color: var(--muted-2);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

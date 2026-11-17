@@ -165,6 +165,25 @@
   text-align: center;
 }
 
+.sidebar-storage-issue {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 8px 9px;
+  border: 1px solid rgba(180, 79, 89, 0.18);
+  border-radius: 8px;
+  background: rgba(180, 79, 89, 0.04);
+  color: #9d3d48;
+  font-size: 9.5px;
+  line-height: 1.55;
+}
+
+.sidebar-storage-issue svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
 .sidebar__rule {
   height: 1px;
   flex: 0 0 auto;

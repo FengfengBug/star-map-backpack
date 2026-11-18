@@ -15,6 +15,7 @@ import { KnowledgeGraph } from './components/KnowledgeGraph';
 import { ReviewRoute } from './components/ReviewRoute';
 import { Sidebar } from './components/Sidebar';
 import { Toast } from './components/Toast';
+import { LearningTimeline } from './components/timeline/LearningTimeline';
 import { UndoToast } from './components/UndoToast';
 import { WorkspaceDataDialog } from './components/WorkspaceDataDialog';
 import {
@@ -34,6 +35,12 @@ import type {
   ReviewRouteState,
 } from './types/knowledge';
 import type { NoteSourceSummary } from './types/noteSource';
+import type { LearningRecord } from './types/learningRecord';
+import {
+  createPlanChangeLearningRecord,
+  createPlanUndoLearningRecord,
+  createReviewLearningRecord,
+} from './utils/learningRecord';
 import {
   createKnowledgeEdges,
   createKnowledgeNodes,
@@ -52,10 +59,13 @@ import {
 import { formatMastery, formatScoreShare } from './utils/star';
 import {
   applySavedNodeEdits,
+  clearLearningRecords,
   clearNodeEdits,
   clearNodePositions,
+  loadLearningRecords,
   loadNodeEdits,
   loadNodePositions,
+  saveLearningRecords,
   type SavedNodePositions,
 } from './utils/storage';
 import {
@@ -85,6 +95,12 @@ const STORAGE_WRITE_FAILURE_MESSAGE =
   '本机存储写入失败，当前修改仅保留在本次会话；可在「本机数据」中清理空间后重试。';
 const STORAGE_BACKUP_FAILURE_MESSAGE =
   '无法写入本机备份，清空已取消；请检查浏览器存储空间后重试。';
+const LEARNING_RECORDS_READ_FAILURE_MESSAGE =
+  '学习记录读取异常，已跳过无法识别的内容；星图与复习参数不受影响。';
+const LEARNING_RECORDS_UNAVAILABLE_MESSAGE =
+  '浏览器本地存储不可用，学习记录仅保留在本次会话。';
+const LEARNING_RECORDS_WRITE_FAILURE_MESSAGE =
+  '学习记录写入失败，新记录仅保留在本次会话；星图与复习参数不受影响。';
 
 type ClearIntent = 'clear' | 'blank';
 type CourseTag = '示例' | '导入' | '空白';
@@ -342,6 +358,7 @@ interface ToastState {
 
 function StarMapWorkspace() {
   const [initialWorkspace] = useState(createInitialWorkspaceState);
+  const [initialLearningRecords] = useState(loadLearningRecords);
   const initialSnapshot = initialWorkspace.snapshot;
   const initialSelection = getDefaultSelection(initialSnapshot);
   const [initialNodes] = useState(() =>
@@ -385,6 +402,17 @@ function StarMapWorkspace() {
   const [routeAnimationRun, setRouteAnimationRun] = useState(0);
   const [planChangeState, setPlanChangeState] = useState<PlanChangeState | null>(null);
   const [routeUndoState, setRouteUndoState] = useState<RouteUndoState | null>(null);
+  const [learningRecords, setLearningRecords] = useState<LearningRecord[]>(
+    initialLearningRecords.records,
+  );
+  const [learningRecordsOpen, setLearningRecordsOpen] = useState(false);
+  const [learningRecordIssue, setLearningRecordIssue] = useState<string | null>(
+    initialLearningRecords.status === 'unavailable'
+      ? LEARNING_RECORDS_UNAVAILABLE_MESSAGE
+      : initialLearningRecords.status === 'corrupt'
+        ? LEARNING_RECORDS_READ_FAILURE_MESSAGE
+        : null,
+  );
   const [toast, setToast] = useState<ToastState | null>(null);
   const [clearIntent, setClearIntent] = useState<ClearIntent | null>(null);
   const [undoState, setUndoState] = useState<UndoState | null>(null);
@@ -406,6 +434,7 @@ function StarMapWorkspace() {
   );
 
   const toastCounter = useRef(0);
+  const learningRecordsRef = useRef(initialLearningRecords.records);
   const persistEnabledRef = useRef(initialWorkspace.canPersist);
   const storageNoticeShownRef = useRef(false);
   const undoTimerRef = useRef<number | null>(null);
@@ -422,6 +451,30 @@ function StarMapWorkspace() {
 
   const openImportPreview = useCallback(() => setIsImportPreviewOpen(true), []);
   const closeImportPreview = useCallback(() => setIsImportPreviewOpen(false), []);
+  const openLearningRecords = useCallback(() => setLearningRecordsOpen(true), []);
+  const closeLearningRecords = useCallback(() => setLearningRecordsOpen(false), []);
+
+  const recordLearningEvent = useCallback((record: LearningRecord) => {
+    const nextRecords = [record, ...learningRecordsRef.current];
+    learningRecordsRef.current = nextRecords;
+    setLearningRecords(nextRecords);
+    setLearningRecordIssue(
+      saveLearningRecords(nextRecords) ? null : LEARNING_RECORDS_WRITE_FAILURE_MESSAGE,
+    );
+  }, []);
+
+  const handleClearLearningRecords = useCallback(() => {
+    if (!clearLearningRecords()) {
+      setLearningRecordIssue(LEARNING_RECORDS_WRITE_FAILURE_MESSAGE);
+      notify('学习记录清空失败，请检查浏览器存储后重试');
+      return;
+    }
+
+    learningRecordsRef.current = [];
+    setLearningRecords([]);
+    setLearningRecordIssue(null);
+    notify('已清空学习记录，星图与复习参数保持不变');
+  }, [notify]);
 
   const handlePersistFailure = useCallback(() => {
     persistEnabledRef.current = false;
@@ -578,6 +631,7 @@ function StarMapWorkspace() {
         points: nextPoints,
       });
 
+      if (change) recordLearningEvent(createPlanChangeLearningRecord(change));
       setRouteUndoState(null);
       setPlanChangeState(
         change
@@ -588,7 +642,7 @@ function StarMapWorkspace() {
           : null,
       );
     },
-    [plannedBudgetMinutes, routePlan],
+    [plannedBudgetMinutes, recordLearningEvent, routePlan],
   );
 
   const handleBudgetChange = useCallback((minutes: number) => {
@@ -608,10 +662,11 @@ function StarMapWorkspace() {
       plan: planChangeState.change.previousPlan,
       routeKey: planChangeState.routeKey,
     });
+    recordLearningEvent(createPlanUndoLearningRecord(planChangeState.change));
     setPlanChangeState(null);
     setRouteAnimationRun((run) => run + 1);
     notify('已恢复上一版航线，节点参数与复习状态保持不变');
-  }, [notify, planChangeState, routePlanKey]);
+  }, [notify, planChangeState, recordLearningEvent, routePlanKey]);
 
   const fitMapToCanvas = useCallback(() => {
     window.requestAnimationFrame(() => {
@@ -774,6 +829,7 @@ function StarMapWorkspace() {
         candidate.id === nodeId ? { ...candidate, reviewed } : candidate,
       );
       setCoursePoints(nextPoints);
+      recordLearningEvent(createReviewLearningRecord(point, reviewed));
       preparePlanChange(nextPoints, {
         kind: 'reviewed',
         nodeId,
@@ -795,7 +851,7 @@ function StarMapWorkspace() {
           : `已撤销「${point.title}」的已复习标记${persistSuffix}`,
       );
     },
-    [coursePoints, notify, preparePlanChange, setNodes],
+    [coursePoints, notify, preparePlanChange, recordLearningEvent, setNodes],
   );
 
   const handlePreviewNode = useCallback(
@@ -1075,6 +1131,10 @@ function StarMapWorkspace() {
     setClearIntent(null);
     setDataDialogOpen(false);
     setRecoveryOpen(false);
+    setLearningRecordsOpen(false);
+    learningRecordsRef.current = [];
+    setLearningRecords([]);
+    setLearningRecordIssue(null);
     resumePersistence();
 
     const blank = createBlankWorkspaceSnapshot();
@@ -1151,6 +1211,9 @@ function StarMapWorkspace() {
           onCreateBlank={handleCreateBlank}
           onClearWorkspace={handleClearWorkspace}
           onManageLocalData={() => setDataDialogOpen(true)}
+          learningRecordCount={learningRecords.length}
+          learningRecordIssue={learningRecordIssue}
+          onOpenLearningRecords={openLearningRecords}
           storageIssue={storageIssue}
         />
         <KnowledgeGraph
@@ -1197,6 +1260,15 @@ function StarMapWorkspace() {
           onLoadSample={handleLoadSample}
         />
       </main>
+
+      {learningRecordsOpen && (
+        <LearningTimeline
+          records={learningRecords}
+          storageIssue={learningRecordIssue}
+          onClose={closeLearningRecords}
+          onClear={handleClearLearningRecords}
+        />
+      )}
 
       {toast && <Toast key={toast.id} message={toast.message} />}
       {undoState && (

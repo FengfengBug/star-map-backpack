@@ -4,7 +4,9 @@ import {
   BookOpen,
   Check,
   FileText,
+  History,
   RefreshCw,
+  ShieldCheck,
   Upload,
 } from 'lucide-react';
 import type { SampleCourseId } from '../data/sampleCourses';
@@ -35,6 +37,9 @@ interface SidebarProps {
   onCreateBlank: () => void;
   onClearWorkspace: () => void;
   onManageLocalData: () => void;
+  learningRecordCount: number;
+  learningRecordIssue: string | null;
+  onOpenLearningRecords: () => void;
   storageIssue: string | null;
 }
 
@@ -66,6 +71,9 @@ export function Sidebar({
   onCreateBlank,
   onClearWorkspace,
   onManageLocalData,
+  learningRecordCount,
+  learningRecordIssue,
+  onOpenLearningRecords,
   storageIssue,
 }: SidebarProps) {
   const [isSamplePickerOpen, setIsSamplePickerOpen] = useState(false);
@@ -172,6 +180,29 @@ export function Sidebar({
               ? '导入笔记已保存在本机，刷新页面后仍会恢复'
               : '空白星图会保留在本机；导入笔记或载入示例开始构建'}
         </p>
+
+        <div className="learning-records-entry">
+          <button
+            type="button"
+            className="learning-records-entry__button"
+            onClick={onOpenLearningRecords}
+            aria-haspopup="dialog"
+            aria-controls="learning-timeline"
+          >
+            <History size={14} strokeWidth={1.8} aria-hidden="true" />
+            学习记录
+            <span>{learningRecordCount}</span>
+          </button>
+          <p className="learning-records-entry__privacy">
+            <ShieldCheck size={11} strokeWidth={1.8} aria-hidden="true" />
+            记录只保存在本机，不包含笔记全文
+          </p>
+          {learningRecordIssue && (
+            <p className="learning-records-entry__issue" role="status">
+              学习记录暂未能持久保存
+            </p>
+          )}
+        </div>
 
         <WorkspaceActions
           onCreateBlank={onCreateBlank}

@@ -1,12 +1,17 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { KnowledgePoint, KnowledgePointEditableFields } from '../types/knowledge';
+import { createReviewLearningRecord } from './learningRecord';
 import {
+  LEARNING_RECORDS_STORAGE_KEY,
   NODE_EDITS_STORAGE_KEY,
   NODE_POSITIONS_STORAGE_KEY,
   applySavedNodeEdits,
+  clearLearningRecords,
   clearNodePositions,
+  loadLearningRecords,
   loadNodeEdits,
   loadNodePositions,
+  saveLearningRecords,
   saveNodeEdit,
 } from './storage';
 
@@ -161,5 +166,55 @@ describe('storage', () => {
     expect(loadNodeEdits('sample:data-structures')).toEqual({
       'binary-tree': validFields,
     });
+  });
+
+  it('学习记录独立持久化，存储内容不包含笔记正文', () => {
+    const storage = useMemoryStorage();
+    const record = createReviewLearningRecord(binaryTreePoint, true, 1_800_000_000_000);
+
+    expect(saveLearningRecords([record])).toBe(true);
+    expect(loadLearningRecords()).toEqual({ status: 'ok', records: [record] });
+
+    const raw = storage.getItem(LEARNING_RECORDS_STORAGE_KEY) ?? '';
+    expect(raw).toContain('binary-tree');
+    expect(raw).toContain('二叉树');
+    expect(raw).not.toContain(binaryTreePoint.content);
+    expect(raw).not.toContain('"content"');
+
+    expect(clearLearningRecords()).toBe(true);
+    expect(loadLearningRecords()).toEqual({ status: 'empty', records: [] });
+  });
+
+  it('跳过损坏的学习记录，并区分读取不可用', () => {
+    const storage = useMemoryStorage();
+    const record = createReviewLearningRecord(binaryTreePoint, true, 1_800_000_000_000);
+    storage.setItem(
+      LEARNING_RECORDS_STORAGE_KEY,
+      JSON.stringify([record, { ...record, id: 'broken', mastery: 101 }, null]),
+    );
+
+    expect(loadLearningRecords()).toEqual({ status: 'corrupt', records: [record] });
+
+    storage.setItem(LEARNING_RECORDS_STORAGE_KEY, '{not-json');
+    expect(loadLearningRecords()).toEqual({ status: 'corrupt', records: [] });
+
+    vi.spyOn(storage, 'getItem').mockImplementation(() => {
+      throw new Error('storage unavailable');
+    });
+    expect(loadLearningRecords()).toEqual({ status: 'unavailable', records: [] });
+  });
+
+  it('学习记录写入或清空失败时返回失败，不伪报已保存', () => {
+    const storage = useMemoryStorage();
+    const record = createReviewLearningRecord(binaryTreePoint, true, 1_800_000_000_000);
+    vi.spyOn(storage, 'setItem').mockImplementation(() => {
+      throw new Error('quota exceeded');
+    });
+    expect(saveLearningRecords([record])).toBe(false);
+
+    vi.spyOn(storage, 'removeItem').mockImplementation(() => {
+      throw new Error('storage unavailable');
+    });
+    expect(clearLearningRecords()).toBe(false);
   });
 });

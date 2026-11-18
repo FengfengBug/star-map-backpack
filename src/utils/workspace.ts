@@ -7,6 +7,7 @@ import type {
 } from '../types/knowledge';
 import type { NoteSourceSummary } from '../types/noteSource';
 import {
+  LEARNING_RECORDS_STORAGE_KEY,
   NODE_EDITS_STORAGE_KEY,
   NODE_POSITIONS_STORAGE_KEY,
   type SavedNodePositions,
@@ -350,6 +351,7 @@ export function clearAllLocalWorkspaceData() {
     window.localStorage.removeItem(WORKSPACE_BACKUP_STORAGE_KEY);
     window.localStorage.removeItem(NODE_POSITIONS_STORAGE_KEY);
     window.localStorage.removeItem(NODE_EDITS_STORAGE_KEY);
+    window.localStorage.removeItem(LEARNING_RECORDS_STORAGE_KEY);
   } catch {
     // 本地存储不可用时无需清理。
   }

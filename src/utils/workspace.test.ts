@@ -5,6 +5,7 @@ import type {
   KnowledgePoint,
 } from '../types/knowledge';
 import {
+  LEARNING_RECORDS_STORAGE_KEY,
   NODE_EDITS_STORAGE_KEY,
   NODE_POSITIONS_STORAGE_KEY,
   type SavedNodePositions,
@@ -225,12 +226,13 @@ describe('workspace storage', () => {
     expect(loadWorkspaceBackup()).toEqual({ status: 'corrupt' });
   });
 
-  it('清除本机数据会移除工作区、备份与旧版坐标/编辑键', () => {
+  it('清除本机数据会移除工作区、备份、学习记录与旧版坐标/编辑键', () => {
     const storage = useMemoryStorage();
     storage.setItem(WORKSPACE_STORAGE_KEY, '{}');
     storage.setItem(WORKSPACE_BACKUP_STORAGE_KEY, '{}');
     storage.setItem(NODE_POSITIONS_STORAGE_KEY, '{}');
     storage.setItem(NODE_EDITS_STORAGE_KEY, '{}');
+    storage.setItem(LEARNING_RECORDS_STORAGE_KEY, '[]');
 
     clearAllLocalWorkspaceData();
 
@@ -238,6 +240,7 @@ describe('workspace storage', () => {
     expect(storage.getItem(WORKSPACE_BACKUP_STORAGE_KEY)).toBeNull();
     expect(storage.getItem(NODE_POSITIONS_STORAGE_KEY)).toBeNull();
     expect(storage.getItem(NODE_EDITS_STORAGE_KEY)).toBeNull();
+    expect(storage.getItem(LEARNING_RECORDS_STORAGE_KEY)).toBeNull();
   });
 
   it('空白备注来源与统计保持稳定', () => {

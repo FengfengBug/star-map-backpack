@@ -4,9 +4,14 @@ import type {
   KnowledgePoint,
   KnowledgePointEditableFields,
 } from '../types/knowledge';
+import type {
+  LearningRecord,
+  LearningRecordNode,
+} from '../types/learningRecord';
 
 export const NODE_POSITIONS_STORAGE_KEY = 'star-map-backpack:node-positions:v1';
 export const NODE_EDITS_STORAGE_KEY = 'star-map-backpack:node-edits:v1';
+export const LEARNING_RECORDS_STORAGE_KEY = 'star-map-backpack:learning-records:v1';
 
 export type SavedNodePositions = Record<string, XYPosition>;
 export type SavedCourseEdits = Record<string, KnowledgePointEditableFields>;
@@ -172,4 +177,136 @@ export function applySavedNodeEdits(
     const savedFields = edits[point.id];
     return savedFields ? { ...point, ...savedFields } : point;
   });
+}
+
+export interface LearningRecordsLoadResult {
+  status: 'ok' | 'empty' | 'corrupt' | 'unavailable';
+  records: LearningRecord[];
+}
+
+function isLearningRecordNode(value: unknown): value is LearningRecordNode {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const node = value as Record<string, unknown>;
+  return (
+    typeof node.id === 'string' &&
+    node.id.trim() !== '' &&
+    typeof node.title === 'string' &&
+    node.title.trim() !== ''
+  );
+}
+
+function isNullableMastery(value: unknown): value is number | null {
+  return isNullableRangeValue(value, 0, 100);
+}
+
+function isNullableMinutes(value: unknown): value is number | null {
+  return (
+    value === null ||
+    (typeof value === 'number' && Number.isInteger(value) && value >= 0)
+  );
+}
+
+function parseLearningRecord(value: unknown): LearningRecord | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+
+  if (
+    typeof record.id !== 'string' ||
+    record.id.trim() === '' ||
+    typeof record.occurredAt !== 'number' ||
+    !Number.isFinite(record.occurredAt) ||
+    record.occurredAt < 0 ||
+    Number.isNaN(new Date(record.occurredAt).getTime()) ||
+    typeof record.summary !== 'string' ||
+    record.summary.trim() === '' ||
+    (record.nodeId !== null && typeof record.nodeId !== 'string') ||
+    (record.nodeTitle !== null && typeof record.nodeTitle !== 'string') ||
+    !Array.isArray(record.details) ||
+    !record.details.every((detail) => typeof detail === 'string') ||
+    !Array.isArray(record.removed) ||
+    !record.removed.every(isLearningRecordNode) ||
+    !Array.isArray(record.added) ||
+    !record.added.every(isLearningRecordNode) ||
+    !isNullableMastery(record.mastery) ||
+    !isNullableMastery(record.previousMastery) ||
+    !isNullableMastery(record.nextMastery) ||
+    !isNullableMinutes(record.previousMinutes) ||
+    !isNullableMinutes(record.nextMinutes)
+  ) {
+    return null;
+  }
+
+  const isReview =
+    record.category === 'review' &&
+    (record.kind === 'reviewed' || record.kind === 'unreviewed');
+  const isRoute =
+    record.category === 'route' &&
+    (record.kind === 'replanned' || record.kind === 'undo');
+  if (!isReview && !isRoute) return null;
+
+  return {
+    id: record.id,
+    occurredAt: record.occurredAt,
+    category: record.category as LearningRecord['category'],
+    kind: record.kind as LearningRecord['kind'],
+    nodeId: record.nodeId as string | null,
+    nodeTitle: record.nodeTitle as string | null,
+    summary: record.summary,
+    details: [...record.details] as string[],
+    removed: record.removed.map(({ id, title }) => ({ id, title })),
+    added: record.added.map(({ id, title }) => ({ id, title })),
+    mastery: record.mastery,
+    previousMastery: record.previousMastery,
+    nextMastery: record.nextMastery,
+    previousMinutes: record.previousMinutes,
+    nextMinutes: record.nextMinutes,
+  };
+}
+
+export function loadLearningRecords(): LearningRecordsLoadResult {
+  let rawValue: string | null;
+  try {
+    rawValue = window.localStorage.getItem(LEARNING_RECORDS_STORAGE_KEY);
+  } catch {
+    return { status: 'unavailable', records: [] };
+  }
+
+  if (!rawValue) return { status: 'empty', records: [] };
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawValue);
+  } catch {
+    return { status: 'corrupt', records: [] };
+  }
+
+  if (!Array.isArray(parsed)) return { status: 'corrupt', records: [] };
+
+  const records = parsed
+    .map(parseLearningRecord)
+    .filter((record): record is LearningRecord => Boolean(record))
+    .sort((a, b) => b.occurredAt - a.occurredAt);
+
+  return {
+    status: records.length === parsed.length ? 'ok' : 'corrupt',
+    records,
+  };
+}
+
+export function saveLearningRecords(records: LearningRecord[]) {
+  try {
+    window.localStorage.setItem(LEARNING_RECORDS_STORAGE_KEY, JSON.stringify(records));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function clearLearningRecords() {
+  try {
+    window.localStorage.removeItem(LEARNING_RECORDS_STORAGE_KEY);
+    return true;
+  } catch {
+    return false;
+  }
 }

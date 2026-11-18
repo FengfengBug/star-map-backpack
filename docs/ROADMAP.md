@@ -2,7 +2,7 @@
 
 - 文档版本：v2.0（Sprint 6 Task 6.3 学习记录时间线完成）
 - 基线日期：2026-11-18
-- 当前代码基线：`a16d911`（Task 6.2 验收记录）；Task 6.3 以未提交工作区改动交付
+- 当前代码基线：`ed91b92`（Task 6.3 学习记录时间线）；验收记录以独立文档提交交付
 - 设计基线：`docs/DESIGN.md`（v1.1 UI/UX 重构基线，2026-11-09）
 - 执行规则：严格按 Sprint 与任务卡顺序推进；本文档是唯一任务清单。
 
@@ -27,14 +27,14 @@
 
 ### 1.2 当前进度（2026-11-18）
 
-- 当前工作区基于提交 `a16d911`（Task 6.2 验收记录），本次包含 Task 6.3 实现与文档；开始新任务前先检查 `git status` 与差异，不得覆盖或回滚既有改动。
+- 当前工作区基于提交 `ed91b92`（Task 6.3 学习记录时间线），本次追加验收截图与 DEVLOG；开始新任务前先检查 `git status` 与差异，不得覆盖或回滚既有改动。
 - 当前设计基线为 `docs/DESIGN.md` v1.1：浅色内容工作台；星星作为知识节点、关系和航线标记；Liquid Glass 限于功能浮层；拖拽跟手并在释放后阻尼回稳。
 - 核心能力已接入：React Flow 星图、笔记导入、示例课程、节点编辑、本地持久化、0-1 背包、航线动画、选择理由、复习状态、动态重排提示、一次航线撤销与学习记录时间线。
 - 工作区快照持久化到 `star-map-backpack:workspace:v1`（`sample` / `imported` / `blank`），最近清空备份到 `star-map-backpack:workspace-backup:v1`，学习记录独立保存到 `star-map-backpack:learning-records:v1`；旧坐标键 `star-map-backpack:node-positions:v1` 与旧编辑键 `star-map-backpack:node-edits:v1` 继续兼容读取。
 - 验证基线：2026-11-18 `npm run build` 成功；`npm test` 18 个测试文件、111 项通过。
 - Task 5.1、Task 5.2、Task 5.3、Task 5.4、Task 5.99、Task 6.1-fix、Task 6.2-fix、Task 6.1、Task 6.2 与 Task 6.3 已完成；下一项为 Task 6.4 分享卡。
 - Task 5.99 新增 Task 6.1-fix、Task 6.2-fix 与 B-14–B-18；Sprint 6 原任务顺延，Task 6.1 前置条件改为 Task 6.2-fix。
-- `a16d911` 已推送；Task 6.3 改动尚未提交，未获明确授权前不提交、不推送，不改远程绑定。
+- `ed91b92` 为 Task 6.3 功能提交；本次仅追加验收截图与 DEVLOG，按用户明确授权提交并推送，不改远程绑定。
 - 大赛部署要求已纳入 Task 7.6“Qoder Sites 部署与线上验收”，Task 7.99 的前置条件同步改为 Task 7.6。
 - 账号、云同步与后端是否引入仍待产品评估，现阶段不开发；AI 辅助暂缓，Task 7.1、Task 7.2 已移入 Backlog，未重新排期前不开展 AI 工作。
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ChevronDown, Compass, Flag, Play, Route, Sparkles } from 'lucide-react';
+import { ChevronDown, Compass, Flag, Play, Route, Share2, Sparkles } from 'lucide-react';
 import type { KnapsackDecision } from '../algorithms/knapsack';
 import type { KnowledgeFlowNode } from '../types/knowledge';
 import type { PlanChange } from '../utils/planChange';
@@ -12,6 +12,7 @@ import {
 } from '../utils/routeEmptyState';
 import { PlanChangeNotice } from './PlanChangeNotice';
 import { RouteReasonSheet } from './RouteReasonSheet';
+import { ShareCardDialog } from './share/ShareCardDialog';
 import './ReviewRoute.css';
 
 const MIN_BUDGET_MINUTES = 0;
@@ -20,6 +21,8 @@ const BUDGET_STEP_MINUTES = 5;
 
 interface ReviewRouteProps {
   nodes: KnowledgeFlowNode[];
+  courseTitle: string;
+  isSampleData: boolean;
   budgetMinutes: number;
   onBudgetChange: (minutes: number) => void;
   animationEnabled: boolean;
@@ -80,6 +83,8 @@ function getSuggestedBudget(minutes: number | null) {
 
 export function ReviewRoute({
   nodes,
+  courseTitle,
+  isSampleData,
   budgetMinutes,
   onBudgetChange,
   animationEnabled,
@@ -97,7 +102,13 @@ export function ReviewRoute({
   onLoadSample,
 }: ReviewRouteProps) {
   const [reasonsOpen, setReasonsOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const closeReasons = useCallback(() => setReasonsOpen(false), []);
+  const closeShare = useCallback(() => setShareOpen(false), []);
+  const showShare = useCallback(() => {
+    setReasonsOpen(false);
+    setShareOpen(true);
+  }, []);
 
   useEffect(() => {
     if (planChange) setReasonsOpen(false);
@@ -109,6 +120,11 @@ export function ReviewRoute({
     (decision) => !decision.selected && !isPendingDecision(decision),
   ).length;
   const pendingCount = decisions.filter(isPendingDecision).length;
+
+  useEffect(() => {
+    if (selectedCount === 0) setShareOpen(false);
+  }, [selectedCount]);
+
   const emptyState = getRouteEmptyState({
     nodeCount: nodes.length,
     budgetMinutes,
@@ -454,18 +470,32 @@ export function ReviewRoute({
             </span>
             航线动画
           </label>
-          <button
-            type="button"
-            className="route-action"
-            onClick={onGenerateRoute}
-            disabled={emptyContent !== null || routeNodeCount < 2}
-            title={routeActionHint}
-            aria-describedby="route-action-hint"
-          >
-            <Route size={14} strokeWidth={1.8} aria-hidden="true" />
-            生成复习航线
-            {animationEnabled && <Play size={10} strokeWidth={2} aria-hidden="true" />}
-          </button>
+          <div className="route-actions">
+            <button
+              type="button"
+              className="route-action"
+              onClick={onGenerateRoute}
+              disabled={emptyContent !== null || routeNodeCount < 2}
+              title={routeActionHint}
+              aria-describedby="route-action-hint"
+            >
+              <Route size={14} strokeWidth={1.8} aria-hidden="true" />
+              生成复习航线
+              {animationEnabled && <Play size={10} strokeWidth={2} aria-hidden="true" />}
+            </button>
+            <button
+              type="button"
+              className="route-action route-action--share"
+              onClick={showShare}
+              disabled={selectedCount === 0}
+              title={selectedCount === 0 ? '当前没有可分享的选中航线' : '预览并下载复习航线分享卡'}
+              aria-haspopup="dialog"
+              aria-controls="share-card-dialog"
+            >
+              <Share2 size={13} strokeWidth={1.8} aria-hidden="true" />
+              分享卡
+            </button>
+          </div>
           <p className="route-side__hint" id="route-action-hint">
             {routeActionHint}
           </p>
@@ -491,6 +521,19 @@ export function ReviewRoute({
           totalBenefit={totalBenefit}
           onClose={closeReasons}
           onLocate={onLocateNode}
+        />
+      )}
+
+      {shareOpen && (
+        <ShareCardDialog
+          courseTitle={courseTitle}
+          isSampleData={isSampleData}
+          nodes={nodes}
+          decisions={decisions}
+          routeSelectedIds={routeSelectedIds}
+          budgetMinutes={budgetMinutes}
+          totalBenefit={totalBenefit}
+          onClose={closeShare}
         />
       )}
     </>

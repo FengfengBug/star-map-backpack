@@ -1243,6 +1243,8 @@ function StarMapWorkspace() {
         />
         <ReviewRoute
           nodes={nodes}
+          courseTitle={courseTitle}
+          isSampleData={workspaceKind === 'sample'}
           budgetMinutes={budgetMinutes}
           onBudgetChange={handleBudgetChange}
           animationEnabled={routeAnimationEnabled}

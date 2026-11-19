@@ -8,6 +8,8 @@ function renderEmptyRoute() {
   return renderToStaticMarkup(
     <ReviewRoute
       nodes={[]}
+      courseTitle="数据结构与算法"
+      isSampleData
       budgetMinutes={150}
       onBudgetChange={noop}
       animationEnabled

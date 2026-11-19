@@ -97,3 +97,9 @@
 简要说明：完成 Task 6.3 学习记录时间线，接入真实本地复习与航线变化事件、本地日期分组、分类筛选、清空二次确认与存储异常降级；记录独立保存且不包含笔记全文，不影响星图与复习参数；`npm test` 18 个文件 111 项通过，`npm run build` 成功，浏览器验收后已恢复原始工作区；提交 `ed91b92`。
 
 ![](screenshots/2026-11-18-task-63-learning-timeline-01.png)
+
+### 2026-11-18 · Task 6.99 Sprint Review & Backlog Grooming
+
+简要说明：完成 Sprint 6 集中复盘，明确既有 Backlog 去向，新增移动端视口与分享图片落盘两项验收记录；账号、云同步与 AI 继续暂缓，不新增修复卡或调整 Sprint 7 顺序，下一项进入 Task 7.3。`npm test` 19 个文件 114 项通过，`npm run build` 成功；分享卡功能提交 `17a47ab`，说明与复盘文档提交 `20bf62b`。
+
+![](screenshots/2026-11-18-task-699-sprint-review-01.png)

@@ -2,7 +2,7 @@
 
 - 文档版本：v2.0（Sprint 6 Task 6.99 复盘完成）
 - 基线日期：2026-11-18
-- 当前代码基线：`17a47ab`（Task 6.4 复习航线分享卡）；Task 6.99 为文档复盘，验收记录以独立提交交付
+- 当前代码基线：`20bf62b`（Task 6.4 功能与 Sprint 6 复盘文档）；Task 6.99 验收记录以独立提交交付
 - 设计基线：`docs/DESIGN.md`（v1.1 UI/UX 重构基线，2026-11-09）
 - 执行规则：严格按 Sprint 与任务卡顺序推进；本文档是唯一任务清单。
 
@@ -27,7 +27,7 @@
 
 ### 1.2 当前进度（2026-11-18）
 
-- 当前功能基线为提交 `17a47ab`（Task 6.4 复习航线分享卡），Task 6.99 集中复盘已完成，验收截图与 DEVLOG 以独立记录提交交付；开始新任务前先检查 `git status` 与差异，不得覆盖或回滚既有改动。
+- 当前工作区基于提交 `20bf62b`（Task 6.4 功能说明与 Task 6.99 集中复盘），本次追加 Task 6.99 验收截图与 DEVLOG；开始新任务前先检查 `git status` 与差异，不得覆盖或回滚既有改动。
 - 当前设计基线为 `docs/DESIGN.md` v1.1：浅色内容工作台；星星作为知识节点、关系和航线标记；Liquid Glass 限于功能浮层；拖拽跟手并在释放后阻尼回稳。
 - 核心能力已接入：React Flow 星图、笔记导入、示例课程、节点编辑、本地持久化、0-1 背包、航线动画、选择理由、复习状态、动态重排提示、一次航线撤销、学习记录时间线与 PNG 分享卡。
 - 工作区快照持久化到 `star-map-backpack:workspace:v1`（`sample` / `imported` / `blank`），最近清空备份到 `star-map-backpack:workspace-backup:v1`，学习记录独立保存到 `star-map-backpack:learning-records:v1`；旧坐标键 `star-map-backpack:node-positions:v1` 与旧编辑键 `star-map-backpack:node-edits:v1` 继续兼容读取。
